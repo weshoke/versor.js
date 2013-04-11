@@ -1,5 +1,9 @@
+(function(global){
+
+'use strict';
+
 // E3 Geometric Algebra Module
-E3 = {}
+var E3 = typeof exports !== 'undefined' ? exports : (global.E3 = {});
 
 var Sca = function(v0) {
 	this.key = 1;
@@ -514,3 +518,5 @@ Tri.prototype._sp[105] = function(b) {
 		c[0]*d[3]-c[1]*d[2]+c[2]*d[1]+c[3]*d[0]
 	);
 }
+
+}(this));
