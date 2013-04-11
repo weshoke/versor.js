@@ -8,7 +8,7 @@ var Sca = function(v0) {
 E3.Sca = Sca
 
 Sca.prototype.toString = function() {
-	return "Sca: " + this[0]; 
+	return "Sca: " + this[0];
 }
 
 Sca.prototype.ip = function(b) {
@@ -60,7 +60,7 @@ var Vec = function(v0, v1, v2) {
 E3.Vec = Vec
 
 Vec.prototype.toString = function() {
-	return "Vec: " + this[0] + " " + this[1] + " " + this[2]; 
+	return "Vec: " + this[0] + " " + this[1] + " " + this[2];
 }
 
 Vec.prototype.ip = function(b) {
@@ -118,7 +118,7 @@ var Biv = function(v0, v1, v2) {
 E3.Biv = Biv
 
 Biv.prototype.toString = function() {
-	return "Biv: " + this[0] + " " + this[1] + " " + this[2]; 
+	return "Biv: " + this[0] + " " + this[1] + " " + this[2];
 }
 
 Biv.prototype.ip = function(b) {
@@ -177,7 +177,7 @@ var Rot = function(v0, v1, v2, v3) {
 E3.Rot = Rot
 
 Rot.prototype.toString = function() {
-	return "Rot: " + this[0] + " " + this[1] + " " + this[2] + " " + this[3]; 
+	return "Rot: " + this[0] + " " + this[1] + " " + this[2] + " " + this[3];
 }
 
 Rot.prototype.ip = function(b) {
@@ -239,7 +239,7 @@ var Rot_Vec = function(v0, v1, v2, v3) {
 E3.Rot_Vec = Rot_Vec
 
 Rot_Vec.prototype.toString = function() {
-	return "Rot_Vec: " + this[0] + " " + this[1] + " " + this[2] + " " + this[3]; 
+	return "Rot_Vec: " + this[0] + " " + this[1] + " " + this[2] + " " + this[3];
 }
 
 Rot_Vec.prototype.ip = function(b) {
@@ -298,7 +298,7 @@ var Tri = function(v0) {
 E3.Tri = Tri
 
 Tri.prototype.toString = function() {
-	return "Tri: " + this[0]; 
+	return "Tri: " + this[0];
 }
 
 Tri.prototype.ip = function(b) {
