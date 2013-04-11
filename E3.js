@@ -1,7 +1,12 @@
+// E3 Geometric Algebra Module
+E3 = {}
+
 var Sca = function(v0) {
 	this.key = 1;
 	this[0] = v0;
 }
+E3.Sca = Sca
+
 Sca.prototype.toString = function() {
 	return "Sca: " + this[0]; 
 }
@@ -52,6 +57,8 @@ var Vec = function(v0, v1, v2) {
 	this[1] = v1;
 	this[2] = v2;
 }
+E3.Vec = Vec
+
 Vec.prototype.toString = function() {
 	return "Vec: " + this[0] + " " + this[1] + " " + this[2]; 
 }
@@ -108,6 +115,8 @@ var Biv = function(v0, v1, v2) {
 	this[1] = v1;
 	this[2] = v2;
 }
+E3.Biv = Biv
+
 Biv.prototype.toString = function() {
 	return "Biv: " + this[0] + " " + this[1] + " " + this[2]; 
 }
@@ -165,6 +174,8 @@ var Rot = function(v0, v1, v2, v3) {
 	this[2] = v2;
 	this[3] = v3;
 }
+E3.Rot = Rot
+
 Rot.prototype.toString = function() {
 	return "Rot: " + this[0] + " " + this[1] + " " + this[2] + " " + this[3]; 
 }
@@ -225,6 +236,8 @@ var Rot_Vec = function(v0, v1, v2, v3) {
 	this[2] = v2;
 	this[3] = v3;
 }
+E3.Rot_Vec = Rot_Vec
+
 Rot_Vec.prototype.toString = function() {
 	return "Rot_Vec: " + this[0] + " " + this[1] + " " + this[2] + " " + this[3]; 
 }
@@ -282,6 +295,8 @@ var Tri = function(v0) {
 	this.key = 128;
 	this[0] = v0;
 }
+E3.Tri = Tri
+
 Tri.prototype.toString = function() {
 	return "Tri: " + this[0]; 
 }
