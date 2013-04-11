@@ -17,7 +17,7 @@ Operators:
 
 ```
 var e1 = E3.Vec(1, 0, 0); // unit vector
-var e2 = E3.Vec(1, 0, 0); // unit vector
+var e2 = E3.Vec(0, 1, 0); // unit vector
 var e12 = e1.op(e2); // unit bivector
 var rot = e1.gp(e2); // 180 degree rotator, similar to a quaternion
 
