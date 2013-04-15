@@ -35,24 +35,31 @@ Sca.prototype._sp = {};
 
 
 // reverse(Sca) -> Sca
-Sca.prototype.reverse = function(b) {
+Sca.prototype.reverse = function() {
 	return new Sca(
 		this[0]
 	);
 }
 
 // involute(Sca) -> Sca
-Sca.prototype.involute = function(b) {
+Sca.prototype.involute = function() {
 	return new Sca(
 		this[0]
 	);
 }
 
 // conjugate(Sca) -> Sca
-Sca.prototype.conjugate = function(b) {
+Sca.prototype.conjugate = function() {
 	return new Sca(
 		this[0]
 	);
+}
+
+// magsq(Sca) -> number
+Sca.prototype.magsq = function() {
+	return this.gp(
+		this.reverse()
+	)[0];
 }
 
 var Vec = function(v0, v1, v2) {
@@ -87,7 +94,7 @@ Vec.prototype._sp = {};
 
 
 // reverse(Vec) -> Vec
-Vec.prototype.reverse = function(b) {
+Vec.prototype.reverse = function() {
 	return new Vec(
 		this[0],
 		this[1],
@@ -96,7 +103,7 @@ Vec.prototype.reverse = function(b) {
 }
 
 // involute(Vec) -> Vec
-Vec.prototype.involute = function(b) {
+Vec.prototype.involute = function() {
 	return new Vec(
 		-this[0],
 		-this[1],
@@ -105,12 +112,19 @@ Vec.prototype.involute = function(b) {
 }
 
 // conjugate(Vec) -> Vec
-Vec.prototype.conjugate = function(b) {
+Vec.prototype.conjugate = function() {
 	return new Vec(
 		-this[0],
 		-this[1],
 		-this[2]
 	);
+}
+
+// magsq(Vec) -> number
+Vec.prototype.magsq = function() {
+	return this.gp(
+		this.reverse()
+	)[0];
 }
 
 var Biv = function(v0, v1, v2) {
@@ -145,7 +159,7 @@ Biv.prototype._sp = {};
 
 
 // reverse(Biv) -> Biv
-Biv.prototype.reverse = function(b) {
+Biv.prototype.reverse = function() {
 	return new Biv(
 		-this[0],
 		-this[1],
@@ -154,7 +168,7 @@ Biv.prototype.reverse = function(b) {
 }
 
 // involute(Biv) -> Biv
-Biv.prototype.involute = function(b) {
+Biv.prototype.involute = function() {
 	return new Biv(
 		this[0],
 		this[1],
@@ -163,12 +177,19 @@ Biv.prototype.involute = function(b) {
 }
 
 // conjugate(Biv) -> Biv
-Biv.prototype.conjugate = function(b) {
+Biv.prototype.conjugate = function() {
 	return new Biv(
 		-this[0],
 		-this[1],
 		-this[2]
 	);
+}
+
+// magsq(Biv) -> number
+Biv.prototype.magsq = function() {
+	return this.gp(
+		this.reverse()
+	)[0];
 }
 
 var Rot = function(v0, v1, v2, v3) {
@@ -204,7 +225,7 @@ Rot.prototype._sp = {};
 
 
 // reverse(Rot) -> Rot
-Rot.prototype.reverse = function(b) {
+Rot.prototype.reverse = function() {
 	return new Rot(
 		this[0],
 		-this[1],
@@ -214,7 +235,7 @@ Rot.prototype.reverse = function(b) {
 }
 
 // involute(Rot) -> Rot
-Rot.prototype.involute = function(b) {
+Rot.prototype.involute = function() {
 	return new Rot(
 		this[0],
 		this[1],
@@ -224,13 +245,20 @@ Rot.prototype.involute = function(b) {
 }
 
 // conjugate(Rot) -> Rot
-Rot.prototype.conjugate = function(b) {
+Rot.prototype.conjugate = function() {
 	return new Rot(
 		this[0],
 		-this[1],
 		-this[2],
 		-this[3]
 	);
+}
+
+// magsq(Rot) -> number
+Rot.prototype.magsq = function() {
+	return this.gp(
+		this.reverse()
+	)[0];
 }
 
 var Rot_Vec = function(v0, v1, v2, v3) {
@@ -266,7 +294,7 @@ Rot_Vec.prototype._sp = {};
 
 
 // reverse(Rot_Vec) -> Rot_Vec
-Rot_Vec.prototype.reverse = function(b) {
+Rot_Vec.prototype.reverse = function() {
 	return new Rot_Vec(
 		this[0],
 		this[1],
@@ -276,7 +304,7 @@ Rot_Vec.prototype.reverse = function(b) {
 }
 
 // involute(Rot_Vec) -> Rot_Vec
-Rot_Vec.prototype.involute = function(b) {
+Rot_Vec.prototype.involute = function() {
 	return new Rot_Vec(
 		-this[0],
 		-this[1],
@@ -286,13 +314,20 @@ Rot_Vec.prototype.involute = function(b) {
 }
 
 // conjugate(Rot_Vec) -> Rot_Vec
-Rot_Vec.prototype.conjugate = function(b) {
+Rot_Vec.prototype.conjugate = function() {
 	return new Rot_Vec(
 		-this[0],
 		-this[1],
 		-this[2],
 		this[3]
 	);
+}
+
+// magsq(Rot_Vec) -> number
+Rot_Vec.prototype.magsq = function() {
+	return this.gp(
+		this.reverse()
+	)[0];
 }
 
 var Tri = function(v0) {
@@ -325,24 +360,31 @@ Tri.prototype._sp = {};
 
 
 // reverse(Tri) -> Tri
-Tri.prototype.reverse = function(b) {
+Tri.prototype.reverse = function() {
 	return new Tri(
 		-this[0]
 	);
 }
 
 // involute(Tri) -> Tri
-Tri.prototype.involute = function(b) {
+Tri.prototype.involute = function() {
 	return new Tri(
 		-this[0]
 	);
 }
 
 // conjugate(Tri) -> Tri
-Tri.prototype.conjugate = function(b) {
+Tri.prototype.conjugate = function() {
 	return new Tri(
 		this[0]
 	);
+}
+
+// magsq(Tri) -> number
+Tri.prototype.magsq = function() {
+	return this.gp(
+		this.reverse()
+	)[0];
 }
 
 // ip(Vec, Vec) -> Sca
