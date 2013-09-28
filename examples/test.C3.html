@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>C3 Geometric Algebra Test</title>
+		<script src="../versor.js"></script>
+		<script>
+
+var C3 = versor.create({
+	metric:[1, 1, 1, 1, -1],
+	types: [
+		{ name:"Vec3", bases:["e1", "e2", "e3"] },
+		{ name:"Biv3", bases:["e12", "e13", "e23"] },
+		{ name:"Rot", bases:["s", "e12", "e13", "e23"] },
+		{ name:"Pnt", bases:["e1", "e2", "e3", "e4", "e5"] },
+		{ name:"Dlp", bases:["e1", "e2", "e3", "e5"] },
+		{ name:"Pln", bases:["e1235", "e1245", "e1345", "e2345"] },
+		{ name:"Sph", bases:["e1235", "e1234", "e1245", "e1345", "e2345"] },
+		{ name:"Dln", bases:["e12", "e13", "e23", "e15", "e25", "e35"] },
+		{ name:"Lin", bases:["e145", "e245", "e345", "e125", "e135", "e235"] },
+		{ name:"Flp", bases:["e15", "e25", "e35", "e45"] },
+		{ name:"Par", bases:["e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
+		{ name:"Cir", bases:["e123", "e145", "e245", "e345", "e124", "e134", "e234", "e125", "e135", "e235"] },
+		{ name:"Bst", bases:["s", "e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
+		{ name:"Dil", bases:["s", "e45"] },
+		{ name:"Mot", bases:["s", "e12", "e13", "e23", "e15", "e25", "e35", "e1235"] },
+		{ name:"Trs", bases:["s", "e14", "e24", "e34"] },
+		{ name:"Drv", bases:["e15", "e25", "e35"] },
+		{ name:"Drb", bases:["e125", "e135", "e235"] },
+		{ name:"Tri3", bases:["e123"] },
+	],
+	conformal:true
+});
+
+document.addEventListener("DOMContentLoaded", function(evt) {
+
+
+	var p1 = C3.Pnt(1, 0, 0, 1, 0.5);
+	var p2 = C3.Pnt(-1, 0, 0, 1, 0.5);
+	document.getElementById("GA").textContent = [
+		p1.toString()+"^"+p2.toString()+" = "+p1.op(p2).toString()
+	].join(" ____________ ");
+
+	
+	
+}, false);
+		
+		</script>
+	</head>
+	<body>
+		<h1>C3 Geometric Algebra Test</h1>
+		<div id="GA"></div>
+	</body>
+</html>

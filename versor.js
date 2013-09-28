@@ -157,6 +157,30 @@ var order = function(c) {
 	};
 }
 
+var compress = function(x) {
+	var tally = {};
+	
+	// collect like terms
+	for(var i=0; i < x.length; ++i) {
+		var iv = x[i];
+		if(tally[iv.id]) {
+			tally[iv.id].w += iv.w;
+		}
+		else {
+			tally[iv.id] = blade(iv.id, iv.w);
+		}
+	}
+	
+	var res = [];
+	for(var id in tally) {
+		var iv = tally[id];
+		if(iv.w != 0) {
+			res.push(iv);
+		}
+	}
+	return res;
+}
+
 var printLines = function(text, from, to) {
 	var lines = text.match(/^.*((\r\n|\n|\r)|$)/gm);
 	from = from || 0;
@@ -179,7 +203,13 @@ var Space = function(props) {
 	this.metric = props.metric;
 	this.basis = this.buildBasis();
 	this.types = this.buildTypes();
-	this.products = this.buildEuclidean();
+	if(props.conformal) {
+		this.values = this.buildConformalValues();
+		this.products = this.buildConformal();
+	}
+	else {
+		this.products = this.buildEuclidean();
+	}
 	this.subspaces = this.buildSubspaces();
 	this.registerSubspaces();
 	this.createTypes(props.types);	
@@ -325,6 +355,17 @@ Space.prototype.bladeTable = function() {
 	return S
 }
 
+// Check For presence of Minkowskian Basis
+Space.prototype.checkMink = function(x) {
+	var v = x & this.values.eplane;
+	if((v == 0) || (v == this.values.eplane)) {
+		return false;
+	}
+	else {
+		return true
+	}
+}
+
 Space.prototype.buildEuclidean = function() {
 	var S = this.bladeTable();
 	for(var i=0; i < this.basis.length; ++i) {
@@ -344,6 +385,122 @@ Space.prototype.buildEuclidean = function() {
 		}
 	}
 	return S;
+}
+
+// Push into e+.e- Minkowskian diagonal metric from a null basis (for calculating metric products)
+Space.prototype.pushMink = function(x) {
+	if((x&this.values.no)==this.values.no) {
+		var t = x^this.values.no;
+		return [
+			blade(t^this.values.ep, 0.5),
+			blade(t^this.values.em, 0.5)
+		];
+	}
+	else if((x&this.values.ni)==this.values.ni) {
+		var t = x^this.values.ni;
+		return [
+			blade(t^this.values.ep, -1),
+			blade(t^this.values.em, 1)
+		];
+	}
+}
+
+// Pop back into degenerate null basis from nondegenerate Minkowskian (after xor-ing)
+Space.prototype.popMink = function(x) {
+	if((x&this.values.ep)==this.values.ep) {
+		var t = x^this.values.ep;
+		return [
+			blade(t^this.values.no, 1),
+			blade(t^this.values.ni, -0.5)
+		];
+	}
+	else if((x&this.values.em)==this.values.em) {
+		var t = x^this.values.em;
+		return [
+			blade(t^this.values.no, 1),
+			blade(t^this.values.ni, 0.5)
+		];
+	}
+}
+
+Space.prototype.accumMink = function(blades) {
+	var res = [];
+	for(var i=0; i < blades.length; ++i) {
+		var iv = blades[i];
+		if(this.checkMink(iv.id)) {
+			var minkBlades = this.popMink(iv.id);
+			for(var j=0; j < minkBlades.length; ++j) {
+				var jv = minkBlades[j];
+				jv.w *= iv.w;
+			}
+			res = res.concat(minkBlades);
+		}
+		else {
+			res.push(iv);
+		}
+	}
+	return res;
+}
+
+Space.prototype.buildConformalBinop = function(S, iv, jv) {
+	// get list of blades in minkowskian (diagonal) metric
+	var tmpA = this.checkMink(iv) ? this.pushMink(iv) : [blade(iv, 1)];
+	var tmpB = this.checkMink(jv) ? this.pushMink(jv) : [blade(jv, 1)];
+	
+	var gpTally = [];
+	var opTally = [];
+	var ipTally = [];
+	for(var a=0; a < tmpA.length; ++a) {
+		var av = tmpA[a];
+		for(var b=0; b < tmpB.length; ++b) {
+			var bv = tmpB[b];
+			// calculate products in mink metric
+			var gp = this.metricProduct(av.id, bv.id);
+			var op = outer(av.id, bv.id);
+			var ip = this.metricInner(av.id, bv.id);
+			
+			// push onto tally stack
+			gpTally.push(blade(gp.id, gp.w*av.w*bv.w));
+			opTally.push(blade(op.id, op.w*av.w*bv.w));
+			ipTally.push(blade(ip.id, ip.w*av.w*bv.w));
+		}
+	}
+		
+	var gpPop = this.accumMink(compress(gpTally));
+	var opPop = this.accumMink(compress(opTally));
+	var ipPop = this.accumMink(compress(ipTally));
+	
+	S[iv].gp[jv] = compress(gpPop);
+	S[iv].op[jv] = compress(opPop);
+	S[iv].ip[jv] = compress(ipPop);
+}
+
+Space.prototype.buildConformalValues = function() {
+	var no = 1<<(this.metric.length-2);
+	var ni = 1<<(this.metric.length-1);
+	return {
+		no: no,
+		ni: ni,
+		ep: no,
+		em: ni,
+		eplane: no|ni
+	}
+}
+
+Space.prototype.buildConformal = function() {
+	var S = this.bladeTable();
+	for(var i=0; i < this.basis.length; ++i) {
+		var ib = this.basis[i];
+		S[ib].involute = involute(ib)
+		S[ib].reverse = reverse(ib)
+		S[ib].conjugate = conjugate(ib)
+		
+		for(var j=0; j < this.basis.length; ++j) {
+			var jb = this.basis[j];
+			this.buildConformalBinop(S, ib, jb)
+		}
+	}
+	return S
 }
 
 var _subspaceNames = ["Vec", "Biv", "Tri", "Quad", "Penta", "Hexa", "Hepta", "Octo"];
@@ -375,8 +532,8 @@ Space.prototype.registerSubspaces = function() {
 }
 
 Space.prototype.replaceType = function(oty, nty) {
-	types[nty] = types[oty];
-	types[oty] = undefined;
+	this.types[nty] = this.types[oty];
+	delete this.types[oty];
 	
 	// rename subspace if necessary
 	for(var i=0; i < this.subspaces.length; ++i) {
@@ -394,7 +551,8 @@ Space.prototype.createType = function(bases, name, overwrite) {
 		var ty = this.types[tyname];
 		if(keyCheck(key, ty.key)) { 
 			if(overwrite) {
-				this.replaceType(i, name)
+
+				this.replaceType(tyname, name)
 				return name;
 			}
 			else {
@@ -409,7 +567,6 @@ Space.prototype.createType = function(bases, name, overwrite) {
 
 Space.prototype.productList = function(bases1, bases2, opname) {
 	var tally = [];
-	var combined = {};
 	
 	// fetch table pairs of values in types
 	var idx = 0
@@ -432,6 +589,7 @@ Space.prototype.productList = function(bases1, bases2, opname) {
 		}
 	}
 
+	var combined = {};
 	// check for similar ids in the tally, or if weight is 0	
 	for(var i=0; i < tally.length; ++i) {
 		var instruction = tally[i];
@@ -658,6 +816,36 @@ Space.prototype.createTypes = function(types) {
 		this.createType(basisBits(ty.bases), ty.name, true);
 	}
 }
+
+
+/*
+var C3 = new Space({
+	metric:[1, 1, 1, 1, -1],
+	types: [
+		{ name:"Vec3", bases:["e1", "e2", "e3"] },
+		{ name:"Biv3", bases:["e12", "e13", "e23"] },
+		{ name:"Rot", bases:["s", "e12", "e13", "e23"] },
+		{ name:"Pnt", bases:["e1", "e2", "e3", "e4", "e5"] },
+		{ name:"Dlp", bases:["e1", "e2", "e3", "e5"] },
+		{ name:"Pln", bases:["e1235", "e1245", "e1345", "e2345"] },
+		{ name:"Sph", bases:["e1235", "e1234", "e1245", "e1345", "e2345"] },
+		{ name:"Dln", bases:["e12", "e13", "e23", "e15", "e25", "e35"] },
+		{ name:"Lin", bases:["e145", "e245", "e345", "e125", "e135", "e235"] },
+		{ name:"Flp", bases:["e15", "e25", "e35", "e45"] },
+		{ name:"Par", bases:["e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
+		{ name:"Cir", bases:["e123", "e145", "e245", "e345", "e124", "e134", "e234", "e125", "e135", "e235"] },
+		{ name:"Bst", bases:["s", "e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
+		{ name:"Dil", bases:["s", "e45"] },
+		{ name:"Mot", bases:["s", "e12", "e13", "e23", "e15", "e25", "e35", "e1235"] },
+		{ name:"Trs", bases:["s", "e14", "e24", "e34"] },
+		{ name:"Drv", bases:["e15", "e25", "e35"] },
+		{ name:"Drb", bases:["e125", "e135", "e235"] },
+		{ name:"Tri3", bases:["e123"] },
+	],
+	conformal:true
+});
+*/
+
 
 
 return {
