@@ -57,13 +57,17 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		return Math.sqrt(Math.abs(sqd(a, b)));
 	}
 	
-	/*
 	function split(pp) {
 		var r = dst(pp, pp);
 		var dlp = C3.e5(-1).ip(pp);
-		var bstA = 
+		var bstA = C3.Bst(pp);
+		var bstB = C3.Bst(pp);
+		bstA[0] -= r;
+		bstB[0] += r;
+		var pA = C3.Pnt(bstA.div(dlp));
+		var pB = C3.Pnt(bstB.div(dlp));
+		return [pA, pB];
 	}
-	*/
 
 	var p1 = nullPnt(1, 0, 0);
 	var p2 = nullPnt(-1, 0, 0);
@@ -71,14 +75,30 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		p1.toString()+"^"+p2.toString()+" = "+p1.op(p2).toString()
 	].join(" ____________ ");
 
+	var pp = p1.op(p2);
+	console.log("pp:", pp.toString());
+	console.log(split(pp));
+
 	/*
 	console.log(sqd(p1, p2));
 	console.log(dst(p1, p2));
 	console.log(typeof p1);
 	*/
+	/*
 	console.log(p1);
 	console.log(C3.Vec3(p1));
+	
+	var v1 = C3.Vec3(1, 0, 0);
+	var v2 = C3.Vec3(0, 1, 0);
+	var rot = v1.gp(v2);
+	var vv = rot.sp(v2);
+	console.log(v1);
+	console.log(rot.toString());
+	console.log(vv.toString());
+	*/
 	//console.log(C3.createCast("Vec3", "Pnt"));
+	//console.log(typeof 1);
+	//console.log(C3.gp(1, p1));
 	
 }, false);
 		

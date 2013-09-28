@@ -16,8 +16,8 @@ var blade = function(b, wt) {
 	return { id:b, w:wt };
 }
 
-var type = function(key, bases) {
-	return { key:key, bases:bases, generated:false };
+var type = function(key, bases, name) {
+	return { key:key, bases:bases, name:name, generated:false };
 }
 
 var classname = function(name) {
@@ -222,22 +222,42 @@ var Space = function(props) {
 	for(var name in this.api.constructors) {
 		this[name] = this.api.constructors[name];
 	}
+	this.initialized = true;
 }
 
 Space.prototype.generate = function(props) {
 	var binopCode = this.generateBinops(props.binops);
 	var typeCode = this.generateRegisteredTypes();
-
+	var typeCodeAliases = {};
+	for(var name in typeCode) {
+		var ty = this.types[name];
+		if(ty.alias && name == ty.alias) {
+			typeCodeAliases[name] = typeCode[name];
+		}
+	}
 	var functionBody = ["var api = { classes:{}, constructors:{} };"];
 	for(var name in typeCode) {
-		var code = typeCode[name];
-		functionBody.push([
-				code,
-				"api.constructors."+name+" = "+name+";",
-				"api.classes."+name+" = "+classname(name)+";"
-			].join("\n")
-		);
+		if(!typeCodeAliases[name]) {
+			var code = typeCode[name];
+			functionBody.push([
+					code,
+					"api.constructors."+name+" = "+name+";",
+					"api.classes."+name+" = "+classname(name)+";"
+				].join("\n")
+			);
+			if(this.types[name].alias) {
+				var aliasName = this.types[name].alias;
+				var aliasCode = typeCodeAliases[aliasName];
+				functionBody.push([
+						aliasCode,
+						"api.constructors."+aliasName+" = "+aliasName+";",
+						"api.classes."+aliasName+" = "+classname(aliasName)+";"
+					].join("\n")
+				);
+			}
+		}
 	}
+	
 	functionBody = functionBody.concat(binopCode);
 	functionBody.push("return api;");
 	var f = new Function("space", functionBody.join("\n\n"));
@@ -340,7 +360,7 @@ Space.prototype.buildTypes = function() {
 		var b = this.basis[i];
 		var key = this.key(b);
 		var name = basisString(b);
-		types[name] = type(key, [b]);
+		types[name] = type(key, [b], name);
 	}
 	return types;
 }
@@ -531,13 +551,15 @@ Space.prototype.buildSubspaces = function() {
 Space.prototype.registerSubspaces = function() {
 	for(var i=0; i < this.subspaces.length; ++i) {
 		var iv = this.subspaces[i];
-		this.types[iv.name] = type(this.basesKey(iv.bases), iv.bases);
+		this.types[iv.name] = type(this.basesKey(iv.bases), iv.bases, iv.name);
 	}
 }
 
-Space.prototype.replaceType = function(oty, nty) {
+Space.prototype.aliasType = function(oty, nty) {
 	this.types[nty] = this.types[oty];
-	delete this.types[oty];
+	this.types[oty].alias = nty;
+	//this.types[oty].alias = nty
+	/*delete this.types[oty];
 	
 	// rename subspace if necessary
 	for(var i=0; i < this.subspaces.length; ++i) {
@@ -547,16 +569,16 @@ Space.prototype.replaceType = function(oty, nty) {
 			break;
 		}
 	}
+	*/
 }
 
-Space.prototype.createType = function(bases, name, overwrite) {
+Space.prototype.createType = function(bases, name, aliasExisting) {
 	var key = this.basesKey(bases);
 	for(var tyname in this.types) {
 		var ty = this.types[tyname];
 		if(keyCheck(key, ty.key)) { 
-			if(overwrite) {
-
-				this.replaceType(tyname, name)
+			if(aliasExisting) {
+				this.aliasType(tyname, name)
 				return name;
 			}
 			else {
@@ -564,8 +586,8 @@ Space.prototype.createType = function(bases, name, overwrite) {
 			}
 		}
 	}
-	
-	this.types[name] = type(key, bases);
+
+	this.types[name] = type(key, bases, name);
 	return name;
 }
 
@@ -608,7 +630,6 @@ Space.prototype.productList = function(bases1, bases2, opname) {
 			combined[b] = [instruction];
 		}
 	}
-	//console.log(combined);
 	return order(combined);
 }
 
@@ -652,7 +673,12 @@ Space.prototype.generateType = function(name) {
 		model.classname+".prototype._ip = {};",
 		model.classname+".prototype._op = {};",
 		model.classname+".prototype._gp = {};",
-		model.classname+".prototype._sp = {};",
+		"",
+		model.classname+".prototype.inverse = function() {",
+		"\tvar rev = this.reverse();",
+		"\tvar sca = this.gp(rev)[0];",
+		"\treturn rev.gp(1/sca);",
+		"}",
 		"",
 		model.classname+".prototype.ip = function(b) {",
 		"\tif(!this._ip[b.type]) {",
@@ -669,6 +695,9 @@ Space.prototype.generateType = function(name) {
 		"}",
 		"",
 		model.classname+".prototype.gp = function(b) {",
+		"\tif(typeof b == \"number\") {",
+		"\t\tb = space.s(b);",
+		"\t}",
 		"\tif(!this._gp[b.type]) {",
 		"\t\tspace.createBinop('gp', this.type, b.type);",
 		"\t}",
@@ -676,7 +705,12 @@ Space.prototype.generateType = function(name) {
 		"}",
 		"",
 		model.classname+".prototype.sp = function(b) {",
-		"\treturn this._sp[b.type].call(this, b);",
+		"\tvar v = this.inverse().gp(b).gp(this);",
+		"\treturn "+"new b.__proto__.constructor(v);",
+		"}",
+		"",
+		model.classname+".prototype.div = function(b) {",
+		"\treturn this.gp(b.inverse());",
 		"}",
 		"",
 		model.classname+".prototype.toArray = function() {",
@@ -764,11 +798,14 @@ Space.prototype.generateUnop = function(opname, tyname) {
 	].join("\n");
 }
 
+Space.prototype.sandwichOp = function(tyname1, tyname2) {
+	var ty1 = this.types[tyname1];	
+	var ty2 = this.types[tyname2];
+}
+
 Space.prototype.binopResultType = function(opname, tyname1, tyname2) {
 	var ty1 = this.types[tyname1]	
-	var coords1 = basisNames(ty1.bases);
 	var ty2 = this.types[tyname2]	
-	var coords2 = basisNames(ty2.bases);
 	
 	var op = this.productList(ty1.bases, ty2.bases, opname);
 	var tynameRes
@@ -783,9 +820,7 @@ Space.prototype.binopResultType = function(opname, tyname1, tyname2) {
 
 Space.prototype.generateBinop = function(opname, tyname1, tyname2) {
 	var ty1 = this.types[tyname1]	
-	var coords1 = basisNames(ty1.bases);
 	var ty2 = this.types[tyname2]	
-	var coords2 = basisNames(ty2.bases);
 	
 	var op = this.productList(ty1.bases, ty2.bases, opname);
 	var tynameRes
@@ -799,6 +834,27 @@ Space.prototype.generateBinop = function(opname, tyname1, tyname2) {
 	var tyRes = this.types[tynameRes];
 	if(!tyRes) {
 		console.log("ERROR: gentype " + tyname1+tyname2+"_"+opname, op.blades);
+	}
+	else if(this.initialized && !tyRes.generated) {
+		// TODO: consolidate this with the generate() function
+		var code = this.generateType(tynameRes);
+		var functionBody = ["var api = { classes:{}, constructors:{} };"];
+		functionBody.push([
+				code,
+				"api.constructors."+tynameRes+" = "+tynameRes+";",
+				"api.classes."+tynameRes+" = "+classname(tynameRes)+";"
+			].join("\n")
+		);
+		
+		functionBody.push("return api;");
+		var f = new Function("space", functionBody.join("\n\n"));
+		var api = f(this);
+		for(var name in api.classes) {
+			this.api.classes[name] = api.classes[name];
+		}
+		for(var name in api.constructors) {
+			this.api.constructors[name] = api.constructors[name];
+		}
 	}
 	
 	var ops = [];
@@ -848,6 +904,12 @@ Space.prototype.generateRegisteredTypes = function() {
 		if(!ty.generated) {
 			code[name] = this.generateType(name);
 		}
+		else {
+			code[name] = [
+				"var "+classname(name)+" = "+classname(ty.name)+";",
+				"var "+name+" = "+ty.name+";"
+			].join("\n");
+		}
 	}
 	return code;
 }
@@ -866,6 +928,25 @@ Space.prototype.createTypes = function(types) {
 		var ty = types[i];
 		this.createType(basisBits(ty.bases), ty.name, true);
 	}
+}
+
+Space.prototype.ip = function(a, b) {
+	return a.ip(b);
+}
+
+Space.prototype.op = function(a, b) {
+	return a.op(b);
+}
+
+Space.prototype.gp = function(a, b) {
+	if(typeof a == "number") {
+		a = this.s(a);
+	}
+	return a.gp(b);
+}
+
+Space.prototype.sp = function(a, b) {
+	return a.sp(b);
 }
 
 
