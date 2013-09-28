@@ -1,3 +1,7 @@
+/*
+	CAST (use basis)
+	.sp product
+*/
 var versor = function() {
 
 var foreach = function(t, f) {
@@ -636,9 +640,15 @@ Space.prototype.generateType = function(name) {
 	var def = [
 		"var "+model.classname+" = function("+model.parameters+") {",
 		"\tthis.type = \""+model.name+"\";",
+		"\tif(typeof "+coords[0]+" == \"object\") {",
+		"\t\tthis.cast("+coords[0]+");",
+		"\t}",
+		"\telse {",
 		model.setfields.join("\n"),
+		"\t}",
 		"};",
 		"",
+		model.classname+".prototype._cast = {};",
 		model.classname+".prototype._ip = {};",
 		model.classname+".prototype._op = {};",
 		model.classname+".prototype._gp = {};",
@@ -675,7 +685,14 @@ Space.prototype.generateType = function(name) {
 		"",
 		model.classname+".prototype.toString = function() {",
 		"\treturn \""+model.name+"(\" + this.toArray().join(\", \") + \")\";",
-		"}"
+		"}",
+		model.classname+".prototype.cast = function(b) {",
+		"\tif(!this._cast[b.type]) {",
+		"\t\tspace.createCast(this.type, b.type);",
+		"\t}",
+		"\treturn this._cast[b.type].call(this, b);",
+		"}",
+		"",
 		].join("\n");
 	
 	var code = [def];
@@ -688,6 +705,40 @@ Space.prototype.generateType = function(name) {
 	ty.generated = true;
 
 	return code.join("\n\n");
+}
+
+Space.prototype.createCast = function(toName, fromName) {
+	var toTy = this.types[toName]	
+	var fromTy = this.types[fromName]	
+
+	var fromCoordMap = {}
+	foreach(fromTy.bases, function(v, i) {
+		fromCoordMap[v] = i;
+	});
+
+	var ops = [];
+	foreach(toTy.bases, function(v, i) {
+		var src;
+		if(typeof fromCoordMap[v] == "number") src = "b["+fromCoordMap[v]+"]";
+		else src = "0"
+		ops[i] = "this["+i+"] = "+src+";"
+	});
+	
+	var model = {
+		classname: classname(toName),
+		fromTy:fromName,
+		ops: ops.join("\n")
+	};
+	
+	
+	var code = [
+		model.classname+".prototype._cast."+model.fromTy+" = function(b) {",
+		model.ops,
+		"};"
+	].join("\n");
+	
+	var f = new Function(classname(toName), code);
+	f(this.api.classes[toName]);
 }
 
 Space.prototype.generateUnop = function(opname, tyname) {
@@ -844,13 +895,18 @@ var C3 = new Space({
 	],
 	conformal:true
 });
+
+function nullPnt(a, b, c) {
+	return C3.Pnt(a, b, c, 1, (a*a+b*b+c*c)*0.5);
+}
+var p1 = nullPnt(1, 0, 0);
+console.log(p1.toString());
+console.log(C3.Vec3(p1).toString());
 */
-
-
-
 return {
 	create: function(props) {
 		return new Space(props);
 	}
 };	
 }();
+

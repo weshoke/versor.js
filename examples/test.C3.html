@@ -33,14 +33,52 @@ var C3 = versor.create({
 
 document.addEventListener("DOMContentLoaded", function(evt) {
 
+	function nullPnt(a, b, c) {
+		return C3.Pnt(a, b, c, 1, (a*a+b*b+c*c)*0.5);
+	}
+	
+	function inullPnt(a, b, c) {
+		return C3.Pnt(a, b, c, -1, (a*a+b*b+c*c)*0.5);
+	}
+	
+	function dls(a, b, c, r) {
+		var s = nullPnt(a, b, c);
+		var r2 = r*r;
+		if(r > 0) s[4] -= 0.5*r2;
+		else s[4] += 0.5*r2;
+		return s;
+	}
+	
+	function sqd(a, b) {
+		return -a.ip(b)[0];
+	}
+	
+	function dst(a, b) {
+		return Math.sqrt(Math.abs(sqd(a, b)));
+	}
+	
+	/*
+	function split(pp) {
+		var r = dst(pp, pp);
+		var dlp = C3.e5(-1).ip(pp);
+		var bstA = 
+	}
+	*/
 
-	var p1 = C3.Pnt(1, 0, 0, 1, 0.5);
-	var p2 = C3.Pnt(-1, 0, 0, 1, 0.5);
+	var p1 = nullPnt(1, 0, 0);
+	var p2 = nullPnt(-1, 0, 0);
 	document.getElementById("GA").textContent = [
 		p1.toString()+"^"+p2.toString()+" = "+p1.op(p2).toString()
 	].join(" ____________ ");
 
-	
+	/*
+	console.log(sqd(p1, p2));
+	console.log(dst(p1, p2));
+	console.log(typeof p1);
+	*/
+	console.log(p1);
+	console.log(C3.Vec3(p1));
+	//console.log(C3.createCast("Vec3", "Pnt"));
 	
 }, false);
 		
