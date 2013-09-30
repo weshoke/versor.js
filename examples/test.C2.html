@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>C2 Geometric Algebra Test</title>
+		<script src="../versor.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<link type="text/css" rel="stylesheet" href="style.css"/>
+	<style type="text/css">
+
+circle {
+	stroke: #000;
+	fill: none;
+	stroke-opacity: .5;
+	stroke-width: 0.05;
+}
+
+line {
+	stroke: #000;
+	stroke-opacity: .5;
+	stroke-width: 0.05;
+}
+
+#src {
+	stroke: #f22;
+}
+
+#res {
+	stroke: #08f;
+}
+
+		</style>
+		<script>
+
+var C2 = versor.create({
+	metric:[1, 1, 1, -1],
+	types: [
+		{ name:"Vec2", bases:["e1, e2"] },
+		{ name:"Rot", bases:["s", "e12"] },
+		{ name:"Pnt", bases:["e1", "e2", "e3", "e4"] },
+		{ name:"Par", bases:["e12", "e13", "e14", "e23", "e24", "e34"] },
+		{ name:"Dln", bases:["e1", "e2", "e4"] },
+		{ name:"Lin", bases:["e134", "e234", "e124"] },
+		{ name:"Flp", bases:["e14", "e24", "e34"] },
+		{ name:"Drv", bases:["e14", "e24"] },
+		{ name:"Tnv", bases:["e13", "e23", "e14", "e24", "e34"] },
+		{ name:"Dil", bases:["s", "e34"] },
+		{ name:"Trs", bases:["s", "e14", "e24"] },
+		{ name:"Mot", bases:["s", "e12", "e14", "e24", "e124"] },
+		{ name:"Bst", bases:["s", "e12", "e13", "e14", "e23", "e24", "e34"] },
+	],
+	conformal:true
+});
+
+document.addEventListener("DOMContentLoaded", function(evt) {
+	var Ori = C2.e3(1);
+	var Inf = C2.e4(1);
+	var Pss = C2.e1234(1);
+	
+	function cosh(v) {
+		return (Math.exp(v) + Math.exp(-v))*0.5;
+	}
+	
+	function sinh(v) {
+		return (Math.exp(v) - Math.exp(-v))*0.5;
+	}
+	
+	
+	var Ro = {
+		point: function(x, y) {
+			return C2.Pnt(x, y, 1, (x*x+y*y)*0.5);
+		},
+		circle: function(x, y, r) {
+			var s = Ro.point(x, y);
+			var r2 = r*r;
+			if(r > 0) s[3] -= 0.5*r2;
+			else s[3] += 0.5*r2;
+			return s;
+		},
+		size: function(a, dual) {
+			var v1 = Inf.ip(a);
+			var v2 = a.gp(a.involute()).gp(v1.gp(v1).inverse());
+			return dual ? -v2[0] : v2[0];
+		},
+		cen: function(a) {
+			var v = Inf.ip(a);
+			return C2.Pnt(a.gp(Inf).gp(a).div(v.gp(v).gp(-2)));
+		}
+	}
+	
+	var Fl = {
+		dir: function(a, dual) {
+			return dual ?
+				C2.e4(-1).op(a) :
+				C2.e4(-1).ip(a);
+		},
+		loc: function(a, p, dual) {
+			if(dual) return C2.Pnt(p.op(a).div(a));
+			else return C2.Pnt(p.ip(a).div(a));
+		}
+	}
+	
+	var Op = {
+		trs: function(x, y) {
+			return C2.Trs(1, 0.5*x, 0.5*y);
+		}
+	}
+	
+	
+	function dual(a) {
+		return a.gp(Pss);
+	}
+	
+	function normalizePoint(p) {
+		return p.gp(1/p[2]);
+	}
+	
+	
+	
+	
+	
+	function circleRadius(c) {
+		return Math.sqrt(Math.abs(Ro.size(c, true)));
+	}
+	
+	function circleX(c) {
+		return Ro.cen(c)[0];
+	}
+	
+	function circleY(c) {
+		return Ro.cen(c)[1];
+	}
+	
+	var origin = Ro.point(0, 0);
+	var _lineSize = 100;
+	function lineX1(line) {
+		var dir = Fl.dir(line);
+		var loc = Fl.loc(line, origin);
+		return loc[0]-dir[0]*_lineSize
+	}
+	
+	function lineX2(line) {
+		var dir = Fl.dir(line);
+		var loc = Fl.loc(line, origin);
+		return loc[0]+dir[0]*_lineSize
+	}
+	
+	function lineY1(line) {
+		var dir = Fl.dir(line);
+		var loc = Fl.loc(line, origin);
+		return loc[1]-dir[1]*_lineSize
+	}
+	
+	function lineY2(line) {
+		var dir = Fl.dir(line);
+		var loc = Fl.loc(line, origin);
+		return loc[1]+dir[1]*_lineSize
+	}
+	
+	
+	var s1 = Ro.circle(0, 0, 2);
+	var L1 = Ro.point(0, 0).op(Ro.point(1, 1)).op(Inf);
+	var L2 = Op.trs(1, 0).sp(L1);
+	
+	
+	
+	
+	/*
+	double td = tp.dot()[0]; 
+        
+        if (td < 0) { norm =  sqrt( - td );  sn = -sin(norm) / norm; cn = cosh(norm); }
+        else if (td > 0) { norm = sqrt(td); sn = -sinh(norm) / norm; cn = cosh(norm); }
+        else if (td == 0) { norm = 0; sn = -1; cn = 1; }
+        
+        return Bst(cn, 
+        	tp[0] * sn, tp[1] * sn, tp[2] * sn, 
+        	tp[3] * sn, tp[4] * sn, tp[5] * sn, 
+        	tp[6] * sn, tp[7] * sn, tp[8] * sn, 
+        	tp[9] * sn
+        );
+	*/
+	
+	function bst(pp) {
+		var sz = pp.ip(pp)[0];
+		
+		var cn, sn;
+		if(sz < 0) {
+			var norm = Math.sqrt(-sz);
+			cn = cosh(norm);
+			sn = -sinh(norm);
+		}
+		else if(sz > 0) {
+			var norm = Math.sqrt(sz);
+			cn = cosh(norm);
+			sn = -sinh(norm);
+		}
+		else {
+			cn = 1;
+			sn = -1;
+		}
+		var res = C2.Bst(pp.gp(sn));
+		res[0] = cn;
+		return res;
+	}
+	
+	var pp = Ro.point(1, 1).op(Ro.point(1, 1.6));
+	var boost = bst(pp);
+	
+	var circs = [];
+	var c = Ro.circle(0, 0, 1);
+	for(var i=0; i < 20; i++) {
+		circs[i] = c
+		c = boost.sp(c);
+	}
+	
+	
+	var w=600;
+	var h=600;
+	var svg = d3.select("#GA").append("svg:svg")
+		.attr("width", w)
+		.attr("height", h);
+		
+	var g;
+	var drag = d3.behavior.drag()
+		.on('dragstart', function(){
+		})
+		.on('drag', function(d,i){
+			var pos = d3.mouse(this);
+			pos[0] = (pos[0]-w/2)/20;
+			pos[1] = (pos[1]-h/2)/-20;
+			
+			
+			var src = Ro.circle(pos[0], pos[1], 1);
+			//var res = normalizePoint(s1.sp(src));
+			circs = [];
+			var c = src;
+			for(var i=0; i < 20; i++) {
+				circs[i] = c
+				c = boost.sp(c);
+			}
+			
+			var sel = g.selectAll("circle").data(circs);
+			sel.enter().append("svg:circle");
+			sel.attr("r", circleRadius)
+				.attr("cx", circleX)
+				.attr("cy", circleY);
+			
+			/*
+			console.log(src.toString(), circleX(src), circleY(src));
+			console.log(res.toString(), circleX(res), circleY(res));
+			console.log("");
+			
+			var sel = g.selectAll("#src").data([src]);
+			sel.enter().append("svg:circle");
+			
+			sel.attr("id", "src")
+				.attr("r", circleRadius)
+				.attr("cx", circleX)
+				.attr("cy", circleY);
+				
+			var sel = g.selectAll("#res").data([res]);
+			sel.enter().append("svg:circle");
+			sel.attr("id", "res")
+				.attr("r", circleRadius)
+				.attr("cx", circleX)
+				.attr("cy", circleY);
+			*/
+		});
+		
+	svg.on("mouseover", function (d, i) {
+		//console.log("mouseover:", d, i);
+    })
+    .on("mouseout", function (d, i) {
+		//console.log("mouseout:", d, i);
+    })
+    .on("click", function (d, i) {
+		//console.log("click:", d, i);
+    })
+    .call(drag);
+	
+	g = svg.append("svg:g")
+		.attr("transform", "translate("+(w/2)+", "+(h/2)+") scale("+20+", "+-20+")");
+		
+	g.selectAll("circle")
+		//.data([s1, Ro.circle(-1, 0, 1), Ro.circle(1, 0, 1)])
+		.data(circs)
+	  .enter().append("svg:circle")
+		.attr("r", circleRadius)
+		.attr("cx", circleX)
+		.attr("cy", circleY);
+	
+	/*	
+	g.selectAll("line")
+		.data([L1, L2])
+	  .enter().append("svg:line")
+		.attr("x1", lineX1)
+		.attr("y1", lineY1)
+		.attr("x2", lineX2)
+		.attr("y2", lineY2);
+	*/
+}, false);
+		
+		</script>
+	</head>
+	<body>
+		<h3>C2 Geometric Algebra Test</h3>
+		<div id="GA"></div>
+	</body>
+</html>

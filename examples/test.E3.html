@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>E3 Geometric Algebra Test</title>
+		<script src="../versor.js"></script>
+		<script>
+
+var E3 = versor.create({
+	metric:[1, 1, 1],
+	types: [
+		{ name:"Rot", bases:["s", "e12", "e13", "e23"] },
+		{ name:"Rot_Vec", bases:["e12", "e13", "e23", "e123"] },
+	],
+	binops: [
+		{ op:"op", types:["Vec", "Vec"] },
+		{ op:"op", types:["Biv", "Vec"] }
+	]
+});
+
+document.addEventListener("DOMContentLoaded", function(evt) {
+
+
+	var v1 = E3.Vec(1, 0, 0);
+	var v2 = E3.Vec(.707, .707, 0);	
+	document.getElementById("GA").textContent = [
+		v1.toString()+"^"+v2.toString()+" = "+v1.op(v2).toString(),
+		v1.toString()+"*"+v2.toString()+" = "+v1.gp(v2).toString()
+	].join(" ____________ ");
+
+	
+	
+}, false);
+		
+		</script>
+	</head>
+	<body>
+		<h1>E3 Geometric Algebra Test</h1>
+		<div id="GA"></div>
+	</body>
+</html>
