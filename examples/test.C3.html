@@ -23,7 +23,7 @@ var C3 = versor.create({
 		{ name:"Bst", bases:["s", "e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
 		{ name:"Dil", bases:["s", "e45"] },
 		{ name:"Mot", bases:["s", "e12", "e13", "e23", "e15", "e25", "e35", "e1235"] },
-		{ name:"Trs", bases:["s", "e14", "e24", "e34"] },
+		{ name:"Trs", bases:["s", "e15", "e25", "e35"] },
 		{ name:"Drv", bases:["e15", "e25", "e35"] },
 		{ name:"Drb", bases:["e125", "e135", "e235"] },
 		{ name:"Tri3", bases:["e123"] },
@@ -68,6 +68,13 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		var pB = C3.Pnt(bstB.div(dlp));
 		return [pA, pB];
 	}
+	
+	function size(a, dual) {
+		var v1 = C3.e5(1).ip(a);
+		console.log(v1.toString());
+		var v2 = a.gp(a.involute()).gp(v1.gp(v1).inverse());
+		return dual ? -v2[0] : v2[0];
+	}
 
 	var p1 = nullPnt(1, 0, 0);
 	var p2 = nullPnt(-1, 0, 0);
@@ -76,8 +83,13 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	].join(" ____________ ");
 
 	var pp = p1.op(p2);
-	console.log("pp:", pp.toString());
-	console.log(split(pp));
+	//console.log("pp:", pp.toString());
+	//console.log(split(pp));
+	
+	console.log(p1.toString());
+	console.log(p2.toString());
+	console.log(pp.toString());
+	//console.log(C3.e4(1).op(C3.e5(1)).toString());
 
 	/*
 	console.log(sqd(p1, p2));
