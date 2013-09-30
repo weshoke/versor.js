@@ -230,8 +230,21 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 			
 			
 			var src = Ro.circle(pos[0], pos[1], 1);
-			var res = normalizePoint(s1.sp(src));
+			//var res = normalizePoint(s1.sp(src));
+			circs = [];
+			var c = src;
+			for(var i=0; i < 20; i++) {
+				circs[i] = c
+				c = boost.sp(c);
+			}
 			
+			var sel = g.selectAll("circle").data(circs);
+			sel.enter().append("svg:circle");
+			sel.attr("r", circleRadius)
+				.attr("cx", circleX)
+				.attr("cy", circleY);
+			
+			/*
 			console.log(src.toString(), circleX(src), circleY(src));
 			console.log(res.toString(), circleX(res), circleY(res));
 			console.log("");
@@ -250,6 +263,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 				.attr("r", circleRadius)
 				.attr("cx", circleX)
 				.attr("cy", circleY);
+			*/
 		});
 		
 	svg.on("mouseover", function (d, i) {
