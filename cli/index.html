@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+</style>
+<body>
+<script src="../E3.js"></script>
+<script src="E3parser.js"></script>
+<script>
+var parse = E3parser.parse;
+var run = function(code) {
+  var js = E3parser.parse(code);
+  return eval(js);
+};
+</script>
