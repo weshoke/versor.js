@@ -262,7 +262,6 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 				}
 				
 				// update the position and radius of the circles
-				console.log(circleStartPos);
 				circles = generateCircles(pp, circleStartPos);
 				var sel = g.selectAll(".elements").data(circles);
 				d3Circle(sel);
