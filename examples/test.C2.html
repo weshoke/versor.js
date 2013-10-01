@@ -34,7 +34,7 @@ line {
 var C2 = versor.create({
 	metric:[1, 1, 1, -1],
 	types: [
-		{ name:"Vec2", bases:["e1, e2"] },
+		{ name:"Vec2", bases:["e1", "e2"] },
 		{ name:"Biv2", bases:["e12"] },
 		{ name:"Pss", bases:["e1234"] },
 		{ name:"Rot", bases:["s", "e12"] },
@@ -44,10 +44,10 @@ var C2 = versor.create({
 		{ name:"Lin", bases:["e134", "e234", "e124"] },
 		{ name:"Flp", bases:["e14", "e24", "e34"] },
 		{ name:"Drv", bases:["e14", "e24"] },
-		{ name:"Tnv", bases:["e13", "e23", "e14", "e24", "e34"] },
+		{ name:"Tnv", bases:["e13", "e23"] },
 		{ name:"Dil", bases:["s", "e34"] },
 		{ name:"Trs", bases:["s", "e14", "e24"] },
-		{ name:"Mot", bases:["s", "e12", "e14", "e24", "e124"] },
+		{ name:"Mot", bases:["s", "e12", "e14", "e24"] },
 		{ name:"Bst", bases:["s", "e12", "e13", "e14", "e23", "e24", "e34"] },
 	],
 	conformal:true
@@ -167,23 +167,20 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	var L1 = Ro.point(0, 0).op(Ro.point(1, 1)).op(Inf);
 	var L2 = Op.trs(1, 0).sp(L1);
 	
+	console.log(C2.types.Vec2);
+	console.log(C2.types.Biv2);
 	
+	var v1 = C2.Vec2(1, 0);
+	var v2 = C2.Vec2(0.707, 0.707);
+	var r = v1.gp(v2);
+	var t = Op.trs(1, 1);
+	var rt = t.sp(C2.Mot(r));
+	console.log(v1.toString());
+	console.log(v2.toString());
+	console.log(r.toString());
+	console.log(t.toString());
+	console.log(rt.toString());
 	
-	
-	/*
-	double td = tp.dot()[0]; 
-        
-        if (td < 0) { norm =  sqrt( - td );  sn = -sin(norm) / norm; cn = cosh(norm); }
-        else if (td > 0) { norm = sqrt(td); sn = -sinh(norm) / norm; cn = cosh(norm); }
-        else if (td == 0) { norm = 0; sn = -1; cn = 1; }
-        
-        return Bst(cn, 
-        	tp[0] * sn, tp[1] * sn, tp[2] * sn, 
-        	tp[3] * sn, tp[4] * sn, tp[5] * sn, 
-        	tp[6] * sn, tp[7] * sn, tp[8] * sn, 
-        	tp[9] * sn
-        );
-	*/
 	
 	function bst(pp) {
 		var sz = pp.ip(pp)[0];
