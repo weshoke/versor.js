@@ -650,7 +650,8 @@ Space.prototype.generateType = function(name) {
 		parameters: coords.join(", "),
 		coords: coords,
 		getfields: getfields.join(", "),
-		setfields: setfields
+		setfields: setfields,
+		isdual: ty.dual,
 	};
 	var create = [
 		"var "+model.name+" = function("+model.parameters+") {",
@@ -725,6 +726,10 @@ Space.prototype.generateType = function(name) {
 		"\t\tspace.createCast(this.type, b.type);",
 		"\t}",
 		"\treturn this._cast[b.type].call(this, b);",
+		"}",
+		"",
+		model.classname+".prototype.isdual = function() {",
+		"\treturn "+model.isdual+";",
 		"}",
 		"",
 		].join("\n");
