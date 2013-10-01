@@ -35,10 +35,12 @@ var C2 = versor.create({
 	metric:[1, 1, 1, -1],
 	types: [
 		{ name:"Vec2", bases:["e1, e2"] },
+		{ name:"Biv2", bases:["e12"] },
+		{ name:"Pss", bases:["e1234"] },
 		{ name:"Rot", bases:["s", "e12"] },
-		{ name:"Pnt", bases:["e1", "e2", "e3", "e4"] },
+		{ name:"Pnt", bases:["e1", "e2", "e3", "e4"], dual:true },
 		{ name:"Par", bases:["e12", "e13", "e14", "e23", "e24", "e34"] },
-		{ name:"Dln", bases:["e1", "e2", "e4"] },
+		{ name:"Dll", bases:["e1", "e2", "e4"], dual:true },
 		{ name:"Lin", bases:["e134", "e234", "e124"] },
 		{ name:"Flp", bases:["e14", "e24", "e34"] },
 		{ name:"Drv", bases:["e14", "e24"] },
@@ -55,6 +57,8 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	var Ori = C2.e3(1);
 	var Inf = C2.e4(1);
 	var Pss = C2.e1234(1);
+	
+	console.log(C2.types);
 	
 	function cosh(v) {
 		return (Math.exp(v) + Math.exp(-v))*0.5;
@@ -115,7 +119,9 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	}
 	
 	
-	
+	var L1 = Ro.point(0, 0).op(Ro.point(1, 0)).op(Inf);
+	console.log(L1.toString());
+	console.log(dual(L1).toString());
 	
 	
 	function circleRadius(c) {
