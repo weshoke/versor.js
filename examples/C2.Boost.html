@@ -24,12 +24,17 @@ line {
 	stroke-width: 0.05;
 }
 
-#src {
-	stroke: #f22;
+.generator {
+	stroke: #f33;
+	fill-opacity: 0.7;
 }
 
-#res {
-	stroke: #08f;
+.p1 {
+	fill: #f11;
+}
+
+.p2 {
+	fill: #17f;
 }
 
 		</style>
@@ -90,6 +95,25 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		cen: function(a) {
 			var v = Inf.ip(a);
 			return C2.Pnt(a.gp(Inf).gp(a).div(v.gp(v).gp(-2)));
+		},
+		// squared distance
+		sqd: function(a, b) {
+			return -a.ip(b)[0];
+		},
+		// distance
+		dst: function(a, b) {
+			return Math.sqrt(Math.abs(Ro.sqd(a, b)));
+		},
+		split: function(pp) {
+			var r = Ro.dst(pp, pp);
+			var dlp = C2.e4(-1).ip(pp);
+			var bstA = C2.Bst(pp);
+			var bstB = C2.Bst(pp);
+			bstA[0] -= r;
+			bstB[0] += r;
+			var pA = C2.Pnt(bstA.div(dlp));
+			var pB = C2.Pnt(bstB.div(dlp));
+			return [pA, pB];
 		}
 	}
 	
@@ -143,10 +167,6 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	}
 	
 	
-	var L1 = Ro.point(0, 0).op(Ro.point(1, 0)).op(Inf);
-	console.log(L1.toString());
-	console.log(dual(L1).toString());
-	
 	
 	function circleRadius(c) {
 		return Math.sqrt(Math.abs(Ro.size(c, true)));
@@ -160,130 +180,121 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		return Ro.cen(c)[1];
 	}
 	
-	var origin = Ro.point(0, 0);
-	var _lineSize = 100;
-	function lineX1(line) {
-		var dir = Fl.dir(line);
-		var loc = Fl.loc(line, origin);
-		return loc[0]-dir[0]*_lineSize
-	}
 	
-	function lineX2(line) {
-		var dir = Fl.dir(line);
-		var loc = Fl.loc(line, origin);
-		return loc[0]+dir[0]*_lineSize
-	}
-	
-	function lineY1(line) {
-		var dir = Fl.dir(line);
-		var loc = Fl.loc(line, origin);
-		return loc[1]-dir[1]*_lineSize
-	}
-	
-	function lineY2(line) {
-		var dir = Fl.dir(line);
-		var loc = Fl.loc(line, origin);
-		return loc[1]+dir[1]*_lineSize
-	}
-
-	
-	
-	
-	var pp = Ro.point(1, 1).op(Ro.point(1, 1.6));
-	var boost = Op.bst(pp);
-	
-	var circs = [];
-	var c = Ro.circle(0, 0, 1);
-	for(var i=0; i < 20; i++) {
-		circs[i] = c
-		c = boost.sp(c);
-	}
-	
-	
+	var N=20;
+	var scale=20;
 	var w=600;
 	var h=600;
 	var svg = d3.select("#GA").append("svg:svg")
 		.attr("width", w)
 		.attr("height", h);
 		
+	function canvasToWorld(p) {
+		return [
+			(p[0]-w/2)/scale,
+			(p[1]-h/2)/-scale,
+		];
+	}
+	
+	// draw a C2 circle in an SVG using D3
+	function d3Circle(sel) {
+		return sel.attr("r", circleRadius)
+			.attr("cx", circleX)
+			.attr("cy", circleY);
+	}
+	
+	var p1 = Ro.point(1, 1);
+	var p2 = Ro.point(1, 1.6);
+	var pp = p1.op(p2);
+	function generateCircles(pp, pos) {
+		// generate a boost from a point pair
+		var boost = Op.bst(pp);
+		
+		// iterate the circles through the boost transformation
+		var circles = [];
+		var c = Ro.circle(pos[0], pos[1], 1);
+		for(var i=0; i < N; i++) {
+			circles[i] = c
+			c = boost.sp(c);
+		}
+		return circles;
+	}
+	
+	function dist(p1, p2) {
+		var dx = p1[0]-p2[0];
+		var dy = p1[1]-p2[1];
+		return Math.sqrt(dx*dx+dy*dy);
+	}
+	
+	var circles = generateCircles(pp, [0, 0]);	
 	var g;
-	var drag = d3.behavior.drag()
+	
+	var drag = (function() {
+		var circleStartPos = [0, 0];
+		var dragPoint = undefined;
+		var drag = d3.behavior.drag()
+			.on('dragstart', function(){
+				var pos = canvasToWorld(d3.mouse(this));
+				if(dist(pos, p1) < 3/scale) {
+					dragPoint = "p1";
+				}
+				else if(dist(pos, p2) < 3/scale) {
+					dragPoint = "p2";
+				}
+				else {
+					dragPoint = undefined;
+				}
+			})
+			.on('drag', function(){
+				if(dragPoint) {
+					var pos = canvasToWorld(d3.mouse(this));
+					if(dragPoint == "p1") p1 = Ro.point(pos[0], pos[1]);
+					else p2 = Ro.point(pos[0], pos[1]);
+					pp = p1.op(p2);
+					
+					var sel = g.selectAll(".generator").data(Ro.split(pp));
+					sel.attr("cx", function(d) { return d[0]; })
+						.attr("cy", function(d) { return d[1]; });
+					
+				}
+				else {
+					circleStartPos = canvasToWorld(d3.mouse(this));
+				}
+				
+				// update the position and radius of the circles
+				console.log(circleStartPos);
+				circles = generateCircles(pp, circleStartPos);
+				var sel = g.selectAll(".elements").data(circles);
+				d3Circle(sel);
+			});
+		return drag;
+	})();
+		
+	svg.call(drag);
+	
+	g = svg.append("svg:g")
+		.attr("transform", "translate("+(w/2)+", "+(h/2)+") scale("+scale+", "+(-scale)+")");
+		
+	var sel = g.selectAll(".elements").data(circles)
+		.enter().append("svg:circle")
+			.attr("class", "elements");
+	d3Circle(sel);
+	
+	var generatorDrag = d3.behavior.drag()
 		.on('dragstart', function(){
 		})
 		.on('drag', function(d,i){
-			var pos = d3.mouse(this);
-			pos[0] = (pos[0]-w/2)/20;
-			pos[1] = (pos[1]-h/2)/-20;
-			
-			
-			var src = Ro.circle(pos[0], pos[1], 1);
-			//var res = normalizePoint(s1.sp(src));
-			circs = [];
-			var c = src;
-			for(var i=0; i < 20; i++) {
-				circs[i] = c
-				c = boost.sp(c);
-			}
-			
-			var sel = g.selectAll("circle").data(circs);
-			sel.enter().append("svg:circle");
-			sel.attr("r", circleRadius)
-				.attr("cx", circleX)
-				.attr("cy", circleY);
-			
-			/*
-			console.log(src.toString(), circleX(src), circleY(src));
-			console.log(res.toString(), circleX(res), circleY(res));
-			console.log("");
-			
-			var sel = g.selectAll("#src").data([src]);
-			sel.enter().append("svg:circle");
-			
-			sel.attr("id", "src")
-				.attr("r", circleRadius)
-				.attr("cx", circleX)
-				.attr("cy", circleY);
-				
-			var sel = g.selectAll("#res").data([res]);
-			sel.enter().append("svg:circle");
-			sel.attr("id", "res")
-				.attr("r", circleRadius)
-				.attr("cx", circleX)
-				.attr("cy", circleY);
-			*/
+			var pos = canvasToWorld(d3.mouse(this));
+			console.log(pos, i);
 		});
-		
-	svg.on("mouseover", function (d, i) {
-		//console.log("mouseover:", d, i);
-    })
-    .on("mouseout", function (d, i) {
-		//console.log("mouseout:", d, i);
-    })
-    .on("click", function (d, i) {
-		//console.log("click:", d, i);
-    })
-    .call(drag);
 	
-	g = svg.append("svg:g")
-		.attr("transform", "translate("+(w/2)+", "+(h/2)+") scale("+20+", "+-20+")");
-		
-	g.selectAll("circle")
-		//.data([s1, Ro.circle(-1, 0, 1), Ro.circle(1, 0, 1)])
-		.data(circs)
-	  .enter().append("svg:circle")
-		.attr("r", circleRadius)
-		.attr("cx", circleX)
-		.attr("cy", circleY);
-	
-	/*	
-	g.selectAll("line")
-		.data([L1, L2])
-	  .enter().append("svg:line")
-		.attr("x1", lineX1)
-		.attr("y1", lineY1)
-		.attr("x2", lineX2)
-		.attr("y2", lineY2);
-	*/
+	g.selectAll(".generator").data(Ro.split(pp))
+		.enter().append("svg:circle")
+			.attr("class", function(d, i) { return "generator p"+(i+1); })
+			.attr("cx", function(d) { return d[0]; })
+			.attr("cy", function(d) { return d[1]; })
+			.attr("r", function(d) { return 3/scale; });
+	  	
 }, false);
 		
 		</script>
