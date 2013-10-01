@@ -17,7 +17,7 @@ var blade = function(b, wt) {
 }
 
 var type = function(key, bases, name) {
-	return { key:key, bases:bases, name:name, generated:false };
+	return { key:key, bases:bases, name:name, generated:false, dual:false };
 }
 
 var classname = function(name) {
@@ -650,7 +650,8 @@ Space.prototype.generateType = function(name) {
 		parameters: coords.join(", "),
 		coords: coords,
 		getfields: getfields.join(", "),
-		setfields: setfields
+		setfields: setfields,
+		isdual: ty.dual,
 	};
 	var create = [
 		"var "+model.name+" = function("+model.parameters+") {",
@@ -725,6 +726,10 @@ Space.prototype.generateType = function(name) {
 		"\t\tspace.createCast(this.type, b.type);",
 		"\t}",
 		"\treturn this._cast[b.type].call(this, b);",
+		"}",
+		"",
+		model.classname+".prototype.isdual = function() {",
+		"\treturn "+model.isdual+";",
 		"}",
 		"",
 		].join("\n");
@@ -926,7 +931,10 @@ Space.prototype.generateBinops = function(binops) {
 Space.prototype.createTypes = function(types) {
 	for(var i=0; i < types.length; ++i) {
 		var ty = types[i];
-		this.createType(basisBits(ty.bases), ty.name, true);
+		var name = this.createType(basisBits(ty.bases), ty.name, true);
+		if(ty.dual != undefined) {
+			this.types[name].dual = ty.dual;
+		}
 	}
 }
 
