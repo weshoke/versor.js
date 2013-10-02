@@ -674,6 +674,8 @@ Space.prototype.generateType = function(name) {
 		model.classname+".prototype._ip = {};",
 		model.classname+".prototype._op = {};",
 		model.classname+".prototype._gp = {};",
+		model.classname+".prototype._add = {};",
+		model.classname+".prototype._sub = {};",
 		"",
 		model.classname+".prototype.inverse = function() {",
 		"\tvar rev = this.reverse();",
@@ -712,6 +714,26 @@ Space.prototype.generateType = function(name) {
 		"",
 		model.classname+".prototype.div = function(b) {",
 		"\treturn this.gp(b.inverse());",
+		"}",
+		"",
+		model.classname+".prototype.add = function(b) {",
+		"\tif(typeof b == \"number\") {",
+		"\t\tb = space.s(b);",
+		"\t}",
+		"\tif(!this._add[b.type]) {",
+		"\t\tspace.createAffineOp('add', this.type, b.type);",
+		"\t}",
+		"\treturn this._add[b.type].call(this, b);",
+		"}",
+		"",
+		model.classname+".prototype.sub = function(b) {",
+		"\tif(typeof b == \"number\") {",
+		"\t\tb = space.s(b);",
+		"\t}",
+		"\tif(!this._sub[b.type]) {",
+		"\t\tspace.createAffineOp('sub', this.type, b.type);",
+		"\t}",
+		"\treturn this._sub[b.type].call(this, b);",
 		"}",
 		"",
 		model.classname+".prototype.toArray = function() {",
@@ -803,14 +825,9 @@ Space.prototype.generateUnop = function(opname, tyname) {
 	].join("\n");
 }
 
-Space.prototype.sandwichOp = function(tyname1, tyname2) {
-	var ty1 = this.types[tyname1];	
-	var ty2 = this.types[tyname2];
-}
-
 Space.prototype.binopResultType = function(opname, tyname1, tyname2) {
-	var ty1 = this.types[tyname1]	
-	var ty2 = this.types[tyname2]	
+	var ty1 = this.types[tyname1];
+	var ty2 = this.types[tyname2];
 	
 	var op = this.productList(ty1.bases, ty2.bases, opname);
 	var tynameRes
@@ -900,6 +917,96 @@ Space.prototype.createBinop = function(opname, tyname1, tyname2) {
 	var code = this.generateBinop(opname, tyname1, tyname2);
 	var f = new Function(classname(tyname1), resultType, code);
 	f(this.api.classes[tyname1], this.api.constructors[resultType]);
+}
+
+Space.prototype.createAffineOp = function(opname, tyname1, tyname2) {
+	var opsym = opname == "add" ? "+" : "-";
+
+	var ty1 = this.types[tyname1];
+	var ty2 = this.types[tyname2];
+	var bases1Map = {};
+	var bases2Map = {};
+	var basesMap = {};
+	for(var i=0; i < ty1.bases.length; ++i) {
+		bases1Map[ ty1.bases[i] ] = i;
+		basesMap[ ty1.bases[i] ] = ty1.bases[i];
+	}
+	for(var i=0; i < ty2.bases.length; ++i) {
+		bases2Map[ ty2.bases[i] ] = i;
+		basesMap[ ty2.bases[i] ] = ty2.bases[i];
+	}
+	var bases = [];
+	for(var name in basesMap) {
+		bases.push(basesMap[name]);
+	}
+	bases.sort(function(a, b) {
+		return (a<b) ? -1 : 1;
+	});
+	var ops = [];
+	
+	for(var i=0; i < bases.length; ++i) {
+		var operands = [];
+		var second = false;
+		if(bases1Map[ bases[i] ] != undefined) {
+			operands.push("this["+bases1Map[ bases[i] ]+"]");
+		}
+		if(bases2Map[ bases[i] ] != undefined) {
+			second = true;
+			operands.push("b["+bases2Map[ bases[i] ]+"]");
+		}
+		var op;
+		if(operands.length == 2) {
+			op = operands.join(opsym);
+		}
+		else {
+			op = operands[0];
+			if(second && opname == "sub") {
+				op = opsym+op;
+			}
+		}
+		ops[i] = op;
+	}
+	
+	var tynameRes = this.createType(bases, tyname1+tyname2+"_"+opname, false);
+	var tyRes = this.types[tynameRes];
+	if(this.initialized && !tyRes.generated) {
+		// TODO: consolidate this with the generate() function
+		var code = this.generateType(tynameRes);
+		var functionBody = ["var api = { classes:{}, constructors:{} };"];
+		functionBody.push([
+				code,
+				"api.constructors."+tynameRes+" = "+tynameRes+";",
+				"api.classes."+tynameRes+" = "+classname(tynameRes)+";"
+			].join("\n")
+		);
+		
+		functionBody.push("return api;");
+		var f = new Function("space", functionBody.join("\n\n"));
+		var api = f(this);
+		for(var name in api.classes) {
+			this.api.classes[name] = api.classes[name];
+		}
+		for(var name in api.constructors) {
+			this.api.constructors[name] = api.constructors[name];
+		}
+	}
+	
+	var model = {
+		classname1: classname(tyname1),
+		tyname2: tyname2,
+		opname: opname,
+		tynameRes: tynameRes,
+		ops: ops.join(", ")
+	};
+	
+	var code = [
+		model.classname1+".prototype._"+model.opname+"."+model.tyname2+" = function(b) {",
+		"\treturn "+model.tynameRes+"("+model.ops+");",
+		"};"
+	].join("\n");
+	
+	var f = new Function(classname(tyname1), tynameRes, code);
+	f(this.api.classes[tyname1], this.api.constructors[tynameRes]);
 }
 
 Space.prototype.generateRegisteredTypes = function() {
