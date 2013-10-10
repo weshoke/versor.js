@@ -3,7 +3,7 @@ versor.js
 
 #### A Javascript port of the Versor geometric algebra library ####
 
-Geometric algebra is a mathematical framework for describing spatial computations. The elements in geometric algebra represent objects such as points, lines, cicles, spheres, etc. as well as their transformations.  With a few simple operations, elements can be reflected, rotated, scaled, translated, and so on.  Compared to more widely used techniques in vector or matrix algebra, calculations performed in geometric algebra generalize to N-dimensions.  Operations behave identically in 2D, 3D, and even 4D or higher.
+Geometric algebra is a mathematical framework for describing spatial computations. The elements in geometric algebra represent objects such as points, lines, circles, spheres, etc. as well as their transformations.  With a few simple operations, elements can be reflected, rotated, scaled, translated, and so on.  Compared to more widely used techniques in vector or matrix algebra, calculations performed in geometric algebra generalize to N-dimensions.  Operations behave identically in 2D, 3D, and even 4D or higher.
 
 Versor is a generator for N-dimensional geometric algebras.  It implements both Euclidean and conformal algebras.  Euclidean algebras behave similarly to the familiar 2D and 3D vector spaces.  Conformal algebras add additional dimensions that make possible new geometric objects and transformations.  For an introduction, see Pablo Colapinto's [thesis about Versor](http://www.wolftype.com/versor/colapinto_masters_final_02.pdf).
 
@@ -16,16 +16,16 @@ The space object represents a geometric algebra with a specific metric.  The met
 ```js
 var E3 = versor.create({
 	metric:[1, 1, 1]
-};
+});
 ```
 
 creates an algebra representing a 3D Euclidean space.  Other models are possible such as
 
 ```js
-var C3 = version.create{
+var C3 = versor.create({
 	metric:[1, 1, 1, 1, -1],
 	conformal:true
-};
+});
 ```
 
 which creates a 5D algebra commonly referred to as the 3D conformal model.  While the algebra itself is 5-dimensional, its elements can be used to model objects and transformations in 3D with more generality than the simpler [1, 1, 1] metric.  For more details, see the section on conformal geometric algebra in Geometric Algebra for Computer Science.
@@ -60,7 +60,7 @@ var e1_half = E3.e1(0.5);
 // Create a unit 3D vector along the e1 (aka x) axis
 var v = E3.Vec(1, 0, 0);
 
-// Create a rotor that rotates objects 
+// Create a rotor that rotates objects
 // 90 degrees (π/2 radians) in the e12 (xy-) plane.
 var rot = E3.Rot(Math.cos(Math.PI/4), 0, 0, Math.sin(Math.PI/4));
 ```
@@ -144,7 +144,7 @@ var v = E3.Vec(1, 0, 0).add(E3.Vec(0, 1, 0));
 var b = E3.Biv(0, 1, 0).sub(E3.Biv(0, 0, 1));
 ```
 
-#### Utility Functions #### 
+#### Utility Functions ####
 Finally, there are two other useful functions.  One for converting an element to an array of numbers and another for pretty printing the element.
 
 ```js
