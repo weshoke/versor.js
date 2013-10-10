@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>C2 Rendering Test</title>
+    <script src="../versor.js"></script>
+    <script src="../C2.js"></script>
+
+    <script>
+
+var circle = C2.Ro.circle(0, 0, 3);
+console.log("circle", circle.toString(), circle);
+
+var canvas = document.getElementById("c");
+
+// var draw = CanvasRenderer(canvas)
+//   .bounds({
+//     x: [-4, 4]
+//     y: [-4, 4]
+//   });
+
+// draw(circle);
+
+    </script>
+
+  </head>
+  <body>
+    <h3>C2 Rendering Test</h3>
+    <canvas id="c" width="800" height="800"></canvas>
+  </body>
+</html>
