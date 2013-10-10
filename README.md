@@ -61,7 +61,7 @@ var e1_half = E3.e1(0.5);
 var v = E3.Vec(1, 0, 0);
 
 // Create a rotor that rotates objects 
-// 90 degrees (π/2 radians) in the e1^e2 (xy-) plane.
+// 90 degrees (π/2 radians) in the e12 (xy-) plane.
 var rot = E3.Rot(Math.cos(Math.PI/4), 0, 0, Math.sin(Math.PI/4));
 ```
 
