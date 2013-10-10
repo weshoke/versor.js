@@ -77,9 +77,9 @@ var vec = E3.Vec(E3.Rot(0.5, 1, 0, 0)) // -> Vec(1, 0, 0)
 #### Unary Operators #####
 In geometric algebra, there are a handful of useful unary operators.  They are:
 
-* reverse: reverse the order of basis blades
-* involute: swap the parity of the grade
-* conjugate: a kind of transpose/adjoint operation called the Clifford conjugate
+* __reverse__: reverse the order of basis blades
+* __involute__: swap the parity of the grade
+* __conjugate__: a kind of transpose/adjoint operation called the Clifford conjugate
 
 ```js
 var v = E3.Vec(1, 0, 0);
