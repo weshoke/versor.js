@@ -74,7 +74,7 @@ var vec = E3.Vec(E3.Rot(0.5, 1, 0, 0)) // -> Vec(1, 0, 0)
 ```
 
 ### Operators ###
-### Unary Operators ####
+#### Unary Operators #####
 In geometric algebra, there are a handful of useful unary operators.  They are:
 
 * reverse: reverse the order of basis blades
