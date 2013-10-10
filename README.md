@@ -60,7 +60,8 @@ var e1_half = E3.e1(0.5);
 // Create a unit 3D vector along the e1 (aka x) axis
 var v = E3.Vec(1, 0, 0);
 
-// Create a rotor that rotates objects 90 degrees (π/2 radians)  in the e1^e2 (xy-) plane.
+// Create a rotor that rotates objects 
+// 90 degrees (π/2 radians) in the e1^e2 (xy-) plane.
 var rot = E3.Rot(Math.cos(Math.PI/4), 0, 0, Math.sin(Math.PI/4));
 ```
 
