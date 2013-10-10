@@ -1,7 +1,3 @@
-/*
-	CAST (use basis)
-	.sp product
-*/
 var versor = function() {
 
 var foreach = function(t, f) {
@@ -708,8 +704,8 @@ Space.prototype.generateType = function(name) {
 		"}",
 		"",
 		model.classname+".prototype.sp = function(b) {",
-		"\tvar v = this.inverse().gp(b).gp(this);",
-		"\treturn "+"new b.__proto__.constructor(v);",
+		"\tvar v = b.inverse().gp(this).gp(b);",
+		"\treturn "+"new this.__proto__.constructor(v);",
 		"}",
 		"",
 		model.classname+".prototype.div = function(b) {",
