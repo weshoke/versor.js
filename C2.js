@@ -22,7 +22,6 @@ var C2 = versor.create({
 
 C2.Ori = C2.e3(1);
 C2.Inf = C2.e4(1);
-C2.Pss = C2.e1234(1);
 
 C2.Ro = {
 	point: function(x, y) {
@@ -55,6 +54,10 @@ C2.Ro = {
 	dst: function(a, b) {
 		return Math.sqrt(Math.abs(Ro.sqd(a, b)));
 	},
+	car: function(a) {
+		return a.op(C2.Inf);
+	},
+	// split a point pair into its 2 points, returns an array
 	split: function(pp) {
 		var r = C2.Ro.dst(pp, pp);
 		var dlp = C2.e4(-1).ip(pp);
@@ -66,6 +69,7 @@ C2.Ro = {
 		var pB = C2.Pnt(bstB.div(dlp));
 		return [pA, pB];
 	},
+	// normalize a point to have weight 1
 	pointNormalize: function(p) {
 		return p.gp(1/p[2]);
 	}
