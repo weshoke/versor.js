@@ -108,7 +108,7 @@ var v2 = E3.Vec(1, 0, 0).ip(E3.Biv(0, 1, 0));
 
 One thing to note is that the inner product can be defined in a number of ways with differing results.  The most common inner products are the left constraction and the right contraction.  Here, the inner product is equivalent to the left contraction.  Essentially this means that the first operand must be the same or lower grade than the second operand.  Otherwise, the result is a scalar value of 0.
 
-```
+```js
 // the inner product (left contraction) is not commutative
 var res1 = E3.Vec(1, 0, 0).ip(E3.Biv(0, 1, 0)); // -> Vec(0, 0, 1)
 var res2 = E3.Biv(0, 1, 0).ip(E3.Vec(1, 0, 0)); // -> s(0)
@@ -116,14 +116,14 @@ var res2 = E3.Biv(0, 1, 0).ip(E3.Vec(1, 0, 0)); // -> s(0)
 
 Multiplying an element by a scalar is implemented by the geometric product.  To scale a vector for example, call its geometric product operator and pass in a number.
 
-```
+```js
 // Scale a vector by 2
 var v = E3.Vec(1, 0, 0).gp(2);
 ```
 
 For convenience, elements also have a 'sandwich operator', abbreviated as __sp__.  The sandwich operator is used to apply a versor to an element to transform it.  This is how elements are translated, rotated, scaled, etc. The argument to the sandwich operator is the versor that will transform the element the operator is called from.  For example:
 
-```
+```js
 // Create some vectors and rotors
 var v1 = E3.Vec(1, 0, 0);
 var v2 = E3.Vec(Math.cos(Math.PI/4), Math.sin(Math.PI/4), 0);
