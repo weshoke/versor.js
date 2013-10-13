@@ -52,7 +52,7 @@ C2.Ro = {
 	},
 	// distance
 	dst: function(a, b) {
-		return Math.sqrt(Math.abs(Ro.sqd(a, b)));
+		return Math.sqrt(Math.abs(C2.Ro.sqd(a, b)));
 	},
 	car: function(a) {
 		return a.op(C2.Inf);
