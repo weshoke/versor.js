@@ -67,6 +67,9 @@ var C2Canvas = function(canvas) {
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
+    },
+    Tri: function (el) {
+      return dispatch['Vec'](C2.dual(el));
     }
   };
 
