@@ -19,6 +19,8 @@ var C2Canvas = function(canvas) {
     return canvas.width/(bounds.x[1] - bounds.x[0])*r;
   }
 
+  var pointRadius = 2;
+
   var dispatch = {
     Vec: function(el) {
       var rsquared = C2.Ro.size(el);
@@ -26,7 +28,7 @@ var C2Canvas = function(canvas) {
       var x = mapx(el[0])
       var y = mapy(el[1])
       var r = scale(Math.sqrt(Math.abs(rsquared)));
-      if (r === 0) r = 2;
+      if (r === 0) r = pointRadius;
 
       ctx.beginPath();
       if (rsquared > 0) {
@@ -35,7 +37,35 @@ var C2Canvas = function(canvas) {
         ctx.strokeStyle = "red";
       }
       circle(x,y,r);
-      ctx.closePath();
+      ctx.stroke();
+    },
+    Biv: function (el) {
+      var size = C2.Ro.size(el);
+
+      var points = C2.Ro.split(el);
+
+      var x1 = mapx(points[0][0]);
+      var y1 = mapy(points[0][1]);
+      var x2 = mapx(points[1][0]);
+      var y2 = mapy(points[1][1]);
+
+      ctx.beginPath();
+      if (size > 0) {
+        ctx.strokeStyle = "blue";
+      } else if (size < 0) {
+        ctx.strokeStyle = "red";
+      }
+      //TODO If the size is 0, this is a tangent. How do we want to represent that?
+      circle(x1, y1, pointRadius);
+      ctx.moveTo(x2, y2 + pointRadius);
+      circle(x2, y2, pointRadius);
+      ctx.stroke();
+
+      ctx.beginPath();
+      // Want to draw this dashed, but dashed lines aren't widely supported yet.
+      ctx.strokeStyle = "#888";
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
       ctx.stroke();
     }
   };
