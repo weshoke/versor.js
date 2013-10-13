@@ -86,6 +86,15 @@ var C2Canvas = function(canvas) {
   draw.bounds = function(value) {
     if (!arguments.length) return bounds;
     bounds = value;
+
+    // Adjust y bounds so that the bounds have the same aspect ratio as the canvas.
+    // Otherwise our map functions don't work correctly.
+    var xc = 0.5*(bounds.x[0] + bounds.x[1]);
+    var yc = 0.5*(bounds.y[0] + bounds.y[1]);
+    var xrange = bounds.x[1] - bounds.x[0];
+    bounds.y[0] = yc - 0.5*canvas.height/canvas.width*xrange;
+    bounds.y[1] = yc + 0.5*canvas.height/canvas.width*xrange;
+
     return draw;
   };
 
