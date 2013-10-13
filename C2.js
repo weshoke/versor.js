@@ -121,3 +121,7 @@ C2.Op = {
 		return res;
 	}
 };
+
+C2.dual = function (el) {
+	return el.ip(C2.Pss(1).inverse());
+}
