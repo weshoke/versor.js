@@ -70,6 +70,41 @@ var C2Canvas = function(canvas) {
     },
     Tri: function (el) {
       return dispatch['Vec'](C2.dual(el));
+    },
+    Lin: function (el) {
+      // Points traverse bounds clockwise from top left
+      var p1 = C2.Ro.point(bounds.x[0], bounds.y[0]);
+      var p2 = C2.Ro.point(bounds.x[1], bounds.y[0]);
+      var p3 = C2.Ro.point(bounds.x[1], bounds.y[1]);
+      var p4 = C2.Ro.point(bounds.x[0], bounds.y[1]);
+
+      var dualEl = C2.dual(el);
+
+      var topIntersection = C2.Ro.pointNormalize(dualEl.ip(p1.op(p2).op(C2.Inf)));
+      var rightIntersection = C2.Ro.pointNormalize(dualEl.ip(p2.op(p3).op(C2.Inf)));
+      var bottomIntersection = C2.Ro.pointNormalize(dualEl.ip(p3.op(p4).op(C2.Inf)));
+      var leftIntersection = C2.Ro.pointNormalize(dualEl.ip(p4.op(p1).op(C2.Inf)));
+
+      var displayIntersections = [];
+      if (bounds.x[0] <= topIntersection[0] && topIntersection[0] < bounds.x[1]) {
+        displayIntersections.push(topIntersection);
+      }
+      if (bounds.y[0] <= rightIntersection[1] && rightIntersection[1] < bounds.y[1]) {
+        displayIntersections.push(rightIntersection);
+      }
+      if (bounds.x[0] <= bottomIntersection[0] && bottomIntersection[0] < bounds.x[1]) {
+        displayIntersections.push(bottomIntersection);
+      }
+      if (bounds.y[0] <= leftIntersection[1] && leftIntersection[1] < bounds.y[1]) {
+        displayIntersections.push(leftIntersection);
+      }
+
+      if (displayIntersections.length < 2) return;
+
+      ctx.beginPath();
+      ctx.moveTo(mapx(displayIntersections[0][0]), mapy(displayIntersections[0][1]));
+      ctx.lineTo(mapx(displayIntersections[1][0]), mapy(displayIntersections[1][1]));
+      ctx.stroke();
     }
   };
 
