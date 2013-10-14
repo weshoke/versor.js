@@ -69,11 +69,12 @@ C2.Ro = {
 		var pB = C2.Pnt(bstB.div(dlp));
 		return [pA, pB];
 	},
-	// normalize a point to have weight 1
-	pointNormalize: function(p) {
-		return p.gp(1/p[2]);
-	}
 };
+
+// normalize a point to have weight 1
+C2.Ro.point.normalize = function(p) {
+	return p.gp(1/p[2]);
+}
 	
 C2.Fl = {
 	dir: function(a) {
@@ -101,6 +102,8 @@ C2.Op = {
 	bst: function(pp) {
 		var sz = pp.ip(pp)[0];
 		
+		// Boost is hyperbolic, so use sinh and cosh instead of sin and cos 
+		// to determine the component magnitudes
 		var cn, sn;
 		if(sz < 0) {
 			var norm = Math.sqrt(-sz);
@@ -125,15 +128,14 @@ C2.Op = {
 C2.dual = function (el) {
 	return el.gp(C2.Pss(-1));
 }
-
 C2.undual = function (el) {
 	return el.gp(C2.Pss(1));
 }
 
+// Euclidean duals
 C2.duale = function(el) {
 	return el.gp(C2.Biv2(-1));
 }
-
 C2.uduale = function(el) {
 	return el.gp(C2.Biv2(1));
 }
