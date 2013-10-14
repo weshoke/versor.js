@@ -123,5 +123,17 @@ C2.Op = {
 };
 
 C2.dual = function (el) {
+	return el.gp(C2.Pss(-1));
+}
+
+C2.undual = function (el) {
 	return el.gp(C2.Pss(1));
+}
+
+C2.duale = function(el) {
+	return el.gp(C2.Biv2(-1));
+}
+
+C2.uduale = function(el) {
+	return el.gp(C2.Biv2(1));
 }
