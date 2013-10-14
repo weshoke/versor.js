@@ -123,5 +123,5 @@ C2.Op = {
 };
 
 C2.dual = function (el) {
-	return el.ip(C2.Pss(1).inverse());
+	return el.gp(C2.Pss(1));
 }
