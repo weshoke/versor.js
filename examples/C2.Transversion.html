@@ -26,8 +26,9 @@ line {
 }
 
 .generator {
-	stroke: #f33;
+	stroke: #08f;
 	fill-opacity: 0.7;
+	stroke-width: 0.02;
 }
 
 .points {
@@ -55,9 +56,13 @@ line {
 		</style>
 		<script>
 
+
 document.addEventListener("DOMContentLoaded", function(evt) {
 	var Ro = C2.Ro;
-
+	var Fl = C2.Fl;
+	var Op = C2.Op;
+	
+	
 	var N=20;
 	var scale=100;
 	var w=600;
@@ -80,18 +85,37 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		}
 	}
 	
-	var v1 = C2.Vec2(1, 0);
-	var v2 = C2.Vec2(Math.cos(Math.PI/90), Math.sin(Math.PI/90));
-	var rot = v1.gp(v2);
+	var c1 = Ro.circle(0, 0, 1);
+	var trs = Op.trs(1, 0, 0);
+	var transversion = c1.gp(trs).gp(c1);
+	console.log(transversion.toString());
 	
 	var transformedPoints = [];
 	points.forEach(function(v, i) {
-		transformedPoints[i] = v.sp(rot);
+		transformedPoints[i] = Ro.point.normalize(v.sp(transversion));
 	});
 	
 	var g;
 	g = svg.append("svg:g")
 		.attr("transform", "translate("+(w/2)+", "+(h/2)+") scale("+scale+", "+(-scale)+")");
+	
+	var doubleGradient = function(a, b, c) {
+		var interp1 = d3.interpolateHsl(a, b);
+		var interp2 = d3.interpolateHsl(b, c);
+		
+		return function(t) {
+			if(t < 0.5) {
+				return interp1(t*2);
+			}
+			else {
+				return interp2((t-0.5)*2);
+			}
+		}
+	}
+	
+	
+	var cinterp2 = doubleGradient("#f80", "#030", "#08f");
+	
 	
 	function dist(p1, p2) {
 		var dx = p1[0]-p2[0];
@@ -105,11 +129,14 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		var drag = d3.behavior.drag()
 			.on('dragstart', function(){
 				var pos = canvasToWorld(d3.mouse(this));
-				if(dist(pos, [v1[0]*0.5, v1[1]*0.5]) < 4/scale) {
-					dragPoint = "v1";
+				var r = Math.sqrt(pos[0]*pos[0]+pos[1]*pos[1]);
+				var r1 = Math.sqrt(Math.abs(Ro.size(c1)));
+				
+				if(Math.abs(r-r1) < 3/scale) {
+					dragPoint = "c1";
 				}
-				else if(dist(pos, [v2[0]*0.5, v2[1]*0.5]) < 4/scale) {
-					dragPoint = "v2";
+				else if(dist([trs[1], trs[2]], pos) < 6/scale) {
+					dragPoint = "trs";
 				}
 				else {
 					dragPoint = undefined;
@@ -118,21 +145,40 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 			.on('drag', function(){
 				if(dragPoint) {
 					var pos = canvasToWorld(d3.mouse(this));
-					var angle = Math.atan2(pos[1], pos[0]);
-					var v = C2.Vec2(Math.cos(angle), Math.sin(angle));
+					var r = Math.sqrt(pos[0]*pos[0]+pos[1]*pos[1]);
+					var c = Ro.circle(0, 0, r);
+
+					if(dragPoint == "c1") c1 = c;
+					else {
+						trs = Op.trs(pos[0], pos[1]);
+					}
 					
-					if(dragPoint == "v1") v1 = v;
-					else v2 = v;
+					console.log(trs.toString());
+					var sel = g.selectAll(".generator").data([c1]);
+					sel.attr("cx", function(d) { return d[0]; })
+						.attr("cy", function(d) { return d[1]; })
+						.attr("r", function(d) { return Math.sqrt(Math.abs(Ro.size(d))); });
 					
-					var sel = g.selectAll(".arrow").data([v1, v2]);
+					var sel = g.selectAll(".arrow").data([trs]);
 					sel.attr("transform", function(d) {
-						var angle = Math.atan2(d[1], d[0])*180/Math.PI;
+						var angle = Math.atan2(d[2], d[1])*180/Math.PI;
 						return "rotate("+angle+")";
 					});
 					
-					rot = v1.gp(v2);
+					var sel = g.selectAll(".arrowline")
+					sel.attr("x2", function(d) {
+						console.log(Math.sqrt(trs[1]*trs[1]+trs[2]*trs[2]));
+							return Math.sqrt(trs[1]*trs[1]+trs[2]*trs[2]);
+						});
+						
+					var sel = g.selectAll(".arrowhead1")
+					sel.attr("cx", function(d) {
+							return Math.sqrt(trs[1]*trs[1]+trs[2]*trs[2]);
+						});
+						
+					transversion = c.gp(trs).gp(c);
 					points.forEach(function(v, i) {
-						transformedPoints[i] = v.sp(rot);
+						transformedPoints[i] = Ro.point.normalize(v.sp(transversion));
 					});
 					
 					var sel = g.selectAll(".transformedPoints").data(transformedPoints);
@@ -152,20 +198,34 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 			.attr("class", "points")
 			.attr("cx", function(d) { return d[0]; })
 			.attr("cy", function(d) { return d[1]; })
-			.attr("r", function(d) { return 3/scale; });
+			.attr("r", function(d) { return 3/scale; })
+			.attr("style", function(d, i) { 
+				return "fill: "+cinterp2(i/points.length)+";"
+			});
 			
 	var sel = g.selectAll(".transformedPoints").data(transformedPoints)
 		.enter().append("svg:circle")
 			.attr("class", "transformedPoints")
 			.attr("cx", function(d) { return d[0]; })
 			.attr("cy", function(d) { return d[1]; })
-			.attr("r", function(d) { return 3/scale; });
-	
-	var arrows = g.selectAll(".arrow").data([v1, v2]).enter();	
+			.attr("r", function(d) { return 3/scale; })
+			.attr("style", function(d, i) { 
+				d = points[i];
+				return "fill: "+cinterp2(i/points.length)+";"
+			});
+			
+	var sel = g.selectAll(".generator").data([c1])
+		.enter().append("svg:circle")
+			.attr("class", "generator")
+			.attr("cx", function(d) { return d[0]; })
+			.attr("cy", function(d) { return d[1]; })
+			.attr("r", function(d) { return Math.sqrt(Math.abs(Ro.size(d))); });	
+			
+	var arrows = g.selectAll(".arrow").data([trs]).enter();	
 	var arrowGroup = arrows.append("svg:g")
 		.attr("class", "arrow")
 		.attr("transform", function(d) {
-			var angle = Math.atan2(d[1], d[0])*180/Math.PI;
+			var angle = Math.atan2(d[2], d[1])*180/Math.PI;
 			return "rotate("+angle+")";
 		});
 	
@@ -173,15 +233,18 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		.attr("class", "arrowline")
 		.attr("x1", 0)
 		.attr("y1", 0)
-		.attr("x2", 0.5)
+		.attr("x2", function(d) {
+			return Math.sqrt(d[1]*d[1]+d[2]*d[2]);
+		})
 		.attr("y2", 0);
 		
 	arrowGroup.append("svg:circle")
 		.attr("class", function(d, i) { return "arrowhead"+i; })
-		.attr("cx", 0.5)
+		.attr("cx", function(d) {
+			return Math.sqrt(d[1]*d[1]+d[2]*d[2]);
+		})
 		.attr("cy", 0)
 		.attr("r", 4/scale);
-			
 });
 		</script>
 	</head>

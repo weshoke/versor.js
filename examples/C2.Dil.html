@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	
 	var transformedPoints = [];
 	points.forEach(function(v, i) {
-		transformedPoints[i] = Ro.pointNormalize(v.sp(dil));
+		transformedPoints[i] = Ro.point.normalize(v.sp(dil));
 	});
 	
 	var g;
@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 					
 					dil = C2.Dil(c1.gp(c2));
 					points.forEach(function(v, i) {
-						transformedPoints[i] = Ro.pointNormalize(v.sp(dil));
+						transformedPoints[i] = Ro.point.normalize(v.sp(dil));
 					});
 					
 					var sel = g.selectAll(".transformedPoints").data(transformedPoints);
