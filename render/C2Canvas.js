@@ -80,10 +80,10 @@ var C2Canvas = function(canvas) {
 
       var dualEl = C2.dual(el);
 
-      var topIntersection = C2.Ro.pointNormalize(dualEl.ip(p1.op(p2).op(C2.Inf)));
-      var rightIntersection = C2.Ro.pointNormalize(dualEl.ip(p2.op(p3).op(C2.Inf)));
-      var bottomIntersection = C2.Ro.pointNormalize(dualEl.ip(p3.op(p4).op(C2.Inf)));
-      var leftIntersection = C2.Ro.pointNormalize(dualEl.ip(p4.op(p1).op(C2.Inf)));
+      var topIntersection = C2.Ro.point.normalize(dualEl.ip(p1.op(p2).op(C2.Inf)));
+      var rightIntersection = C2.Ro.point.normalize(dualEl.ip(p2.op(p3).op(C2.Inf)));
+      var bottomIntersection = C2.Ro.point.normalize(dualEl.ip(p3.op(p4).op(C2.Inf)));
+      var leftIntersection = C2.Ro.point.normalize(dualEl.ip(p4.op(p1).op(C2.Inf)));
 
       var displayIntersections = [];
       if (bounds.x[0] <= topIntersection[0] && topIntersection[0] < bounds.x[1]) {
