@@ -24,7 +24,20 @@ var draw = C2Canvas(canvas)
     y: [-4, 4]
   });
 
-draw([C2.Ro.circle(-1, 0, -2), C2.Ro.circle(1, 0, 2), C2.Ro.point(0, 0)]);
+draw([
+  // Imaginary dual circle
+  C2.Ro.circle(-1, 0, -2),
+  // Real dual circle
+  C2.Ro.circle(1, 0, 2),
+  // Point
+  C2.Ro.point(0, 0),
+  // Point pair
+  C2.Ro.point(0, -1).op(C2.Ro.point(1, 0)),
+  // Real direct circle
+  C2.Ro.point(0, 1).op(C2.Ro.point(1, 0)).op(C2.Ro.point(-1, 0)),
+  // Direct line
+  C2.Ro.point(-1, 0).op(C2.Ro.point(0, 1)).op(C2.Inf)
+]);
 
     </script>
   </body>
