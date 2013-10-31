@@ -27,7 +27,14 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		v1.toString()+"*"+v2.toString()+" = "+v1.gp(v2).toString()
 	].join(" ____________ ");
 
-	
+	// Create some vectors and rotors
+var v1 = E3.Vec(1, 0, 0);
+var v2 = E3.Vec(Math.cos(Math.PI/4), Math.sin(Math.PI/4), 0);
+var rot = v1.gp(v2);
+
+// Rotate a vector by 90 degrees using the rotor
+var v = v1.sp(rot); // -> Vec(0, 1, 0)
+console.log(v);
 	
 }, false);
 		

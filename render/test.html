@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>C2 Rendering Test</title>
+    <script src="../versor.js"></script>
+    <script src="../C2.js"></script>
+    <script src="../render/C2Canvas.js"></script>
+
+  </head>
+  <body>
+    <h3>C2 Rendering Test</h3>
+    <canvas id="c" width="800" height="400"></canvas>
+
+    <script>
+
+var circle = C2.Ro.circle(0, 0, -2);
+console.log("circle", circle.toString(), circle);
+
+var canvas = document.getElementById("c");
+
+var draw = C2Canvas(canvas)
+  .bounds({
+    x: [-4, 4],
+    y: [-4, 4]
+  });
+
+draw([
+  // Imaginary dual circle
+  C2.Ro.circle(-1, 0, -2),
+  // Real dual circle
+  C2.Ro.circle(1, 0, 2),
+  // Point
+  C2.Ro.point(0, 0),
+  // Point pair
+  C2.Ro.point(0, -1).op(C2.Ro.point(1, 0)),
+  // Real direct circle
+  C2.Ro.point(0, 1).op(C2.Ro.point(1, 0)).op(C2.Ro.point(-1, 0)),
+  // Direct line
+  C2.Ro.point(-1, 0).op(C2.Ro.point(0, 1)).op(C2.Inf)
+]);
+
+    </script>
+  </body>
+</html>

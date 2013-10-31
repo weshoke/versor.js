@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>C2 Geometric Algebra Test</title>
+		<script src="../versor.js"></script>
+		<script src="../C2.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<link type="text/css" rel="stylesheet" href="style.css"/>
+	<style type="text/css">
+
+svg {
+	background-color: rgba(0, 0, 0, 0.02);
+}
+
+circle {
+	stroke: none;
+	fill: none;
+	stroke-opacity: .5;
+	stroke-width: 0.01;
+}
+
+line {
+	stroke: #000;
+	stroke-opacity: .5;
+	stroke-width: 0.01;
+}
+
+.generator {
+	stroke: #f33;
+	fill-opacity: 0.7;
+}
+
+.points {
+	fill: #000;
+}
+
+.transformedPoints {
+	fill: #F22;
+}
+
+.arrowline {
+	stroke-width: 0.02;
+}
+
+.arrowhead0 {
+	stroke: #000;
+	fill: #f08;
+}
+
+.arrowhead1 {
+	stroke: #000;
+	fill: #08f;
+}
+
+		</style>
+		<script>
+
+document.addEventListener("DOMContentLoaded", function(evt) {
+	var Ro = C2.Ro;
+
+	var N=20;
+	var scale=100;
+	var w=600;
+	var h=600;
+	var svg = d3.select("#GA").append("svg:svg")
+		.attr("width", w)
+		.attr("height", h);
+		
+	function canvasToWorld(p) {
+		return [
+			(p[0]-w/2)/scale,
+			(p[1]-h/2)/-scale,
+		];
+	}
+	
+	var points = [];
+	for(var i=0; i < N; ++i) {
+		for(var j=0; j < N; ++j) {
+			points.push(Ro.point(-2+4/(N-1)*i, -2+4/(N-1)*j));
+		}
+	}
+	
+	var v1 = C2.Vec2(1, 0);
+	var v2 = C2.Vec2(Math.cos(Math.PI/90), Math.sin(Math.PI/90));
+	var rot = v1.gp(v2);
+	
+	var transformedPoints = [];
+	points.forEach(function(v, i) {
+		transformedPoints[i] = v.sp(rot);
+	});
+	
+	var g;
+	g = svg.append("svg:g")
+		.attr("transform", "translate("+(w/2)+", "+(h/2)+") scale("+scale+", "+(-scale)+")");
+	
+	function dist(p1, p2) {
+		var dx = p1[0]-p2[0];
+		var dy = p1[1]-p2[1];
+		return Math.sqrt(dx*dx+dy*dy);
+	}
+	
+	var drag = (function() {
+		var circleStartPos = [0, 0];
+		var dragPoint = undefined;
+		var drag = d3.behavior.drag()
+			.on('dragstart', function(){
+				var pos = canvasToWorld(d3.mouse(this));
+				if(dist(pos, [v1[0]*0.5, v1[1]*0.5]) < 4/scale) {
+					dragPoint = "v1";
+				}
+				else if(dist(pos, [v2[0]*0.5, v2[1]*0.5]) < 4/scale) {
+					dragPoint = "v2";
+				}
+				else {
+					dragPoint = undefined;
+				}
+			})
+			.on('drag', function(){
+				if(dragPoint) {
+					var pos = canvasToWorld(d3.mouse(this));
+					var angle = Math.atan2(pos[1], pos[0]);
+					var v = C2.Vec2(Math.cos(angle), Math.sin(angle));
+					
+					if(dragPoint == "v1") v1 = v;
+					else v2 = v;
+					
+					var sel = g.selectAll(".arrow").data([v1, v2]);
+					sel.attr("transform", function(d) {
+						var angle = Math.atan2(d[1], d[0])*180/Math.PI;
+						return "rotate("+angle+")";
+					});
+					
+					rot = v1.gp(v2);
+					points.forEach(function(v, i) {
+						transformedPoints[i] = v.sp(rot);
+					});
+					
+					var sel = g.selectAll(".transformedPoints").data(transformedPoints);
+					sel.attr("cx", function(d) { return d[0]; })
+						.attr("cy", function(d) { return d[1]; })
+						.attr("r", function(d) { return 3/scale; });
+				}
+			});
+		return drag;
+	})();
+		
+	svg.call(drag);
+	
+	
+	var sel = g.selectAll(".points").data(points)
+		.enter().append("svg:circle")
+			.attr("class", "points")
+			.attr("cx", function(d) { return d[0]; })
+			.attr("cy", function(d) { return d[1]; })
+			.attr("r", function(d) { return 3/scale; });
+			
+	var sel = g.selectAll(".transformedPoints").data(transformedPoints)
+		.enter().append("svg:circle")
+			.attr("class", "transformedPoints")
+			.attr("cx", function(d) { return d[0]; })
+			.attr("cy", function(d) { return d[1]; })
+			.attr("r", function(d) { return 3/scale; });
+	
+	var arrows = g.selectAll(".arrow").data([v1, v2]).enter();	
+	var arrowGroup = arrows.append("svg:g")
+		.attr("class", "arrow")
+		.attr("transform", function(d) {
+			var angle = Math.atan2(d[1], d[0])*180/Math.PI;
+			return "rotate("+angle+")";
+		});
+	
+	arrowGroup.append("svg:line")
+		.attr("class", "arrowline")
+		.attr("x1", 0)
+		.attr("y1", 0)
+		.attr("x2", 0.5)
+		.attr("y2", 0);
+		
+	arrowGroup.append("svg:circle")
+		.attr("class", function(d, i) { return "arrowhead"+i; })
+		.attr("cx", 0.5)
+		.attr("cy", 0)
+		.attr("r", 4/scale);
+			
+});
+		</script>
+	</head>
+	<body>
+		<h3>C2 Geometric Algebra Test</h3>
+		<div id="GA"></div>
+	</body>
+</html>

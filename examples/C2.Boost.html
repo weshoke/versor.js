@@ -80,6 +80,9 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		point: function(x, y) {
 			return C2.Pnt(x, y, 1, (x*x+y*y)*0.5);
 		},
+		ipoint: function(x, y) {
+			return C2.Pnt(x, y, -1, (x*x+y*y)*0.5);
+		},
 		circle: function(x, y, r) {
 			var s = Ro.point(x, y);
 			var r2 = r*r;
@@ -181,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	}
 	
 	
-	var N=20;
+	var N=40;
 	var scale=20;
 	var w=600;
 	var h=600;
@@ -252,7 +255,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 					else p2 = Ro.point(pos[0], pos[1]);
 					pp = p1.op(p2);
 					
-					var sel = g.selectAll(".generator").data(Ro.split(pp));
+					var sel = g.selectAll(".generator").data([p1, p2]);
 					sel.attr("cx", function(d) { return d[0]; })
 						.attr("cy", function(d) { return d[1]; });
 					
@@ -287,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 			console.log(pos, i);
 		});
 	
-	g.selectAll(".generator").data(Ro.split(pp))
+	g.selectAll(".generator").data([p1, p2])
 		.enter().append("svg:circle")
 			.attr("class", function(d, i) { return "generator p"+(i+1); })
 			.attr("cx", function(d) { return d[0]; })
