@@ -1,0 +1,32 @@
+{
+  "name": "versor.js",
+  "version": "0.0.0",
+  "description": "A Javascript port of the Versor geometric algebra library",
+  "main": "versor.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/weshoke/versor.js.git"
+  },
+  "keywords": [
+    "Geometric",
+    "Algebra",
+    "Geometry",
+    "Conformal",
+    "Model",
+    "Euclidean"
+  ],
+  "author": "weshoke",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/weshoke/versor.js/issues"
+  },
+  "devDependencies": {
+    "pegjs": "~0.7.0"
+  }
+}
