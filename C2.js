@@ -77,6 +77,9 @@ C2.Ro.point.normalize = function(p) {
 }
 	
 C2.Fl = {
+	line: function(p1, p2) {
+		return p1.op(p2).op(C2.Inf);
+	},
 	dir: function(a) {
 		return a.isdual() ?
 			C2.e4(-1).op(a) :
@@ -89,12 +92,13 @@ C2.Fl = {
 };
 
 var cosh = function(v) {
-		return (Math.exp(v) + Math.exp(-v))*0.5;
-	}
+	return (Math.exp(v) + Math.exp(-v))*0.5;
+}
 	
 var sinh = function(v) {
 	return (Math.exp(v) - Math.exp(-v))*0.5;
 }
+
 C2.Op = {
 	trs: function(x, y) {
 		return C2.Trs(1, 0.5*x, 0.5*y);

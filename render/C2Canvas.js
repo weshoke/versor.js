@@ -105,6 +105,10 @@ var C2Canvas = function(canvas) {
       ctx.moveTo(mapx(displayIntersections[0][0]), mapy(displayIntersections[0][1]));
       ctx.lineTo(mapx(displayIntersections[1][0]), mapy(displayIntersections[1][1]));
       ctx.stroke();
+    },
+    Dll: function (el) {
+      var del = C2.dual(el);
+      dispatch[del.type](del);
     }
   };
 
