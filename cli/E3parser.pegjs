@@ -24,6 +24,12 @@ innerprod
 
 outerprod
   = left:primary "^" right:outerprod { return left + ".op(" + right + ")"; }
+  / unary
+
+unary
+  = "~" right:primary { return right + ".reverse()"; }
+  / "!" right:primary { return right + ".inverse()"; }
+  / "&" right:primary { return right + ".conjugate()"; }
   / primary
 
 primary
