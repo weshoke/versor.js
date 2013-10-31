@@ -143,6 +143,12 @@ var C2Canvas = function(canvas) {
     Drv: function(el) {
       var del = C2.Dr.elem(el);
       dispatch[del.type](del);
+    },
+    Tnv: function(el) {
+    	var dir = C2.Ta.dir(el);
+    	var loc = C2.Ta.loc(el);
+    	dispatch[dir.type](dir);
+    	dispatch[loc.type](loc);
     }
   };
 

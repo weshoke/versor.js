@@ -129,6 +129,15 @@ C2.Op = {
 	}
 };
 
+C2.Ta = {
+	dir: function(el) {
+		return C2.Inf.ip(el).op(C2.Inf);
+	},
+	loc: function(el) {
+		return C2.Vec(el.div(C2.e4(-1).ip(el)));
+	}
+}
+
 C2.Dr = {
 	elem: function(d) {
 		return C2.Ori.ip(d.involute());
