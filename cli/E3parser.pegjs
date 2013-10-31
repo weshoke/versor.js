@@ -1,5 +1,13 @@
+{
+  var blades = {};
+}
+
 op
-  = geomprod
+  = assignment
+
+assignment
+  = left:blade "=" right:geomprod { blades[left] = right; console.log(blades); }
+  / geomprod
 
 geomprod
   = left:innerprod "*" right:geomprod { return left + ".gp(" + right + ")"; }
