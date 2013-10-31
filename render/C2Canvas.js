@@ -18,10 +18,39 @@ var C2Canvas = function(canvas) {
   function scale(r) {
     return canvas.width/(bounds.x[1] - bounds.x[0])*r;
   }
+  
+  function triangle(x1, y1, x2, y2, x3, y3) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.closePath();
+    ctx.fill();
+  }
 
   var pointRadius = 2;
+  var lineCapSize = 10;
 
   var dispatch = {
+  	Vec2: function(el) {
+      var x1 = mapx(el[0]);
+      var y1 = mapy(el[1]);
+      var normalizedEl = C2.unit(el);
+      var normal = C2.duale(el);
+      var pointOffset = normalizedEl.gp(lineCapSize);
+      var offset = normal.gp(lineCapSize);
+  	
+  	  ctx.beginPath();
+      ctx.moveTo(mapx(0), mapy(0));
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+      
+      triangle(
+      	x1+offset[0], y1+offset[1],
+      	x1+pointOffset[0], y1+pointOffset[1],
+      	x1-offset[0], y1-offset[1]
+      );
+  	},
     Vec: function(el) {
       var rsquared = C2.Ro.size(el);
 
@@ -107,7 +136,12 @@ var C2Canvas = function(canvas) {
       ctx.stroke();
     },
     Dll: function (el) {
+      // could render as a different style
       var del = C2.dual(el);
+      dispatch[del.type](del);
+    },
+    Drv: function(el) {
+      var del = C2.Dr.elem(el);
       dispatch[del.type](del);
     }
   };
