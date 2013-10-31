@@ -1060,6 +1060,21 @@ Space.prototype.sp = function(a, b) {
 	return a.sp(b);
 }
 
+Space.prototype.isSubType = function(tyname1, tyname2) {
+	var bases1 = this.types[tyname1].bases;
+	var bases2 = this.types[tyname2].bases;
+	
+	var bases1Map = {};
+	for(var i=0; i < bases1.length; ++i) {
+		bases1Map[ bases1[i] ] = true;
+	}
+	for(var i=0; i < bases2.length; ++i) {
+		if(!bases1Map[ bases2[i] ]) {
+			return false;
+		}
+	}
+	return true;
+}
 
 /*
 var C3 = new Space({
