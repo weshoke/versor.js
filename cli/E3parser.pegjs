@@ -6,7 +6,12 @@ op
   = assignment
 
 assignment
-  = left:blade "=" right:geomprod { blades[left] = right; console.log(blades); }
+  = left:blade "=" right:geomprod { blades[left] = right; }
+  / combination
+
+combination
+  = left:geomprod "+" right:combination { return left + ".add(" + right + ")"; }
+  / left:geomprod "-" right:combination { return left + ".sub(" + right + ")"; }
   / geomprod
 
 geomprod
