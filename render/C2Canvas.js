@@ -15,6 +15,14 @@ var C2Canvas = function(canvas) {
     return canvas.height*(y-bounds.y[0])/(bounds.y[1] - bounds.y[0]);
   };
 
+  function inversemapx(x) {
+    return x*(bounds.x[1] - bounds.x[0])/canvas.width + bounds.x[0];
+  }
+
+  function inversemapy(y) {
+    return y*(bounds.y[1] - bounds.y[0])/canvas.height + bounds.y[0];
+  }
+
   function scale(r) {
     return canvas.width/(bounds.x[1] - bounds.x[0])*r;
   }
@@ -110,6 +118,7 @@ var C2Canvas = function(canvas) {
 
   var draw = function(els) {
     if (els.length) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (var i = 0; i < els.length; i++) draw(els[i]);
       return;
     }
@@ -136,6 +145,12 @@ var C2Canvas = function(canvas) {
   function circle(x,y,r) {
     ctx.arc(x,y,r,0,2*Math.PI);
   };
+
+  draw.mapx = mapx;
+  draw.mapy = mapy;
+  draw.inversemapx = inversemapx;
+  draw.inversemapy = inversemapy;
+  draw.scale = scale;
 
   return draw;
 };
