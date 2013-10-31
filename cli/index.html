@@ -1,15 +1,53 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-
+  input.command {
+    width: 100em;
+  }
 </style>
 <body>
+<input class="command" />
+<button class="draw">draw</button>
+
+<canvas id="c" width="800" height="400"></canvas>
 <script src="../E3.js"></script>
 <script src="E3parser.js"></script>
+
+<script src="../versor.js"></script>
+<script src="../C2.js"></script>
+<script src="../render/C2Canvas.js"></script>
+
 <script>
+
 var parse = E3parser.parse;
 var run = function(code) {
   var js = E3parser.parse(code);
   return eval(js);
 };
+
+var canvas = document.getElementById("c");
+
+var draw = C2Canvas(canvas)
+  .bounds({
+    x: [-4, 4],
+    y: [-4, 4]
+  });
+
+var drawBtn = document.querySelector('.draw');
+var commandInput = document.querySelector('input.command');
+
+drawBtn.addEventListener('click', runCommand, false);
+
+commandInput.addEventListener('keypress', function(e) {
+  if (e.which === 13) { // Enter
+    runCommand();
+  }
+}, false);
+
+function runCommand () {
+  draw(run(commandInput.value));
+}
+
+draw(C2.Ro.circle(1, 0, 2))
+
 </script>
