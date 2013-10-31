@@ -32,10 +32,6 @@ var C2Canvas = function(canvas) {
   var lineCapSize = 10;
 
   var dispatch = {
-    e3: function (el) {
-      // TODO handle weight if there is one (?)
-      return dispatch.Vec(C2.Ro.point(0, 0));
-    },
     Vec2: function(el) {
       var x1 = mapx(el[0]);
       var y1 = mapy(el[1]);
@@ -150,13 +146,35 @@ var C2Canvas = function(canvas) {
     }
   };
 
+  var dispatchPriority = [
+    'Vec2',
+    'Dll',
+    'Vec',
+    'Biv',
+    'Lin',
+    'Drv',
+    'Tri'
+  ];
+
   var draw = function(els) {
     if (els.length) {
       for (var i = 0; i < els.length; i++) draw(els[i]);
       return;
     }
     ctx.save();
-    dispatch[els.type](els);
+
+    if (dispatch.hasOwnProperty(els.type)) {
+      dispatch[els.type](els);
+    } else {
+      for (var j = 0; j < dispatchPriority.length; j++) {
+        var type = dispatchPriority[j];
+        if (C2.isSubType(type, els.type)) {
+          dispatch[type](C2[type](els));
+          break;
+        }
+      }
+    }
+    
     ctx.restore();
   };
 
