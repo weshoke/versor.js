@@ -33,8 +33,12 @@ unary
   / primary
 
 primary
-  = blade
+  = basisblade
+  / blade
   / "(" op:op ")" { return op; }
+
+basisblade
+  = chars:([e][1-5]+) { return "C2." + chars.join("") + "(1)"; }
 
 blade "blade"
   = chars:[a-zA-Z0-9]+ { return chars.join(""); }

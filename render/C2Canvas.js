@@ -32,7 +32,11 @@ var C2Canvas = function(canvas) {
   var lineCapSize = 10;
 
   var dispatch = {
-  	Vec2: function(el) {
+    e3: function (el) {
+      // TODO handle weight if there is one (?)
+      return dispatch.Vec(C2.Ro.point(0, 0));
+    },
+    Vec2: function(el) {
       var x1 = mapx(el[0]);
       var y1 = mapy(el[1]);
       var normalizedEl = C2.unit(el);
@@ -50,7 +54,7 @@ var C2Canvas = function(canvas) {
       	x1+pointOffset[0], y1+pointOffset[1],
       	x1-offset[0], y1-offset[1]
       );
-  	},
+    },
     Vec: function(el) {
       var rsquared = C2.Ro.size(el);
 
