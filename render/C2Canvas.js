@@ -9,11 +9,11 @@ var C2Canvas = function(canvas) {
 
   function mapx(x) {
     return canvas.width*(x-bounds.x[0])/(bounds.x[1] - bounds.x[0]);
-  };
+  }
 
   function mapy(y) {
     return canvas.height*(y-bounds.y[0])/(bounds.y[1] - bounds.y[0]);
-  };
+  }
 
   function scale(r) {
     return canvas.width/(bounds.x[1] - bounds.x[0])*r;
@@ -39,23 +39,23 @@ var C2Canvas = function(canvas) {
       var normal = C2.duale(el);
       var pointOffset = normalizedEl.gp(lineCapSize);
       var offset = normal.gp(lineCapSize);
-  	
-  	  ctx.beginPath();
+    
+      ctx.beginPath();
       ctx.moveTo(mapx(0), mapy(0));
       ctx.lineTo(x1, y1);
       ctx.stroke();
       
       triangle(
-      	x1+offset[0], y1+offset[1],
-      	x1+pointOffset[0], y1+pointOffset[1],
-      	x1-offset[0], y1-offset[1]
+        x1+offset[0], y1+offset[1],
+        x1+pointOffset[0], y1+pointOffset[1],
+        x1-offset[0], y1-offset[1]
       );
     },
     Vec: function(el) {
       var rsquared = C2.Ro.size(el);
 
-      var x = mapx(el[0])
-      var y = mapy(el[1])
+      var x = mapx(el[0]);
+      var y = mapy(el[1]);
       var r = scale(Math.sqrt(Math.abs(rsquared)));
       if (r === 0) r = pointRadius;
 
@@ -98,7 +98,7 @@ var C2Canvas = function(canvas) {
       ctx.stroke();
     },
     Tri: function (el) {
-      return dispatch['Vec'](C2.dual(el));
+      return dispatch.Vec(C2.dual(el));
     },
     Lin: function (el) {
       // Points traverse bounds clockwise from top left
@@ -195,7 +195,7 @@ var C2Canvas = function(canvas) {
 
   function circle(x,y,r) {
     ctx.arc(x,y,r,0,2*Math.PI);
-  };
+  }
 
   return draw;
 };
