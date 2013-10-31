@@ -129,6 +129,21 @@ C2.Op = {
 	}
 };
 
+C2.Dr = {
+	elem: function(d) {
+		return C2.Ori.ip(d.involute());
+	}
+}
+
+C2.wt = function(el) {
+	return el.ip(el)[0];
+}
+
+C2.unit = function(el) {
+	var mag = Math.sqrt(Math.abs(C2.wt(el)))
+	return C2.gp(el, 1/mag);
+}
+
 C2.dual = function (el) {
 	return el.gp(C2.Pss(-1));
 }
