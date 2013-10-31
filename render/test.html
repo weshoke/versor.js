@@ -14,7 +14,6 @@
     <script>
 
 var circle = C2.Ro.circle(0, 0, -2);
-var dir = C2.Vec2(0.5, 0).op(C2.Inf);
 console.log("circle", circle.toString(), circle);
 
 var canvas = document.getElementById("c");
@@ -39,7 +38,7 @@ draw([
   // Direct line
   C2.Ro.point(-1, 0).op(C2.Ro.point(0, 1)).op(C2.Inf),
   // Direction
-  dir
+  C2.Vec2(0.5, 0).op(C2.Inf)
 ]);
 
     </script>
