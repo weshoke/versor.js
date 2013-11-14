@@ -1,5 +1,7 @@
-var points = [C2.Ro.point(0.5, 0.5)];
+var points = [];
 var objectFunctions = [];
+
+objects = {};
 
 var addPoint = function () {
   points.push(C2.Ro.point(0.5, 0.5));
@@ -13,13 +15,12 @@ var canvasTop = canvas.offsetTop;
 var canvasLeft = canvas.offsetLeft;
 var draw = C2Canvas(canvas)
   .bounds({
-    x: [0, 1],
-    y: [0, 1]
+    x: [-10, 10],
+    y: [-5, 5]
   });
 
 var rerender = function () {
-  var objects = objectFunctions.map(function (fn) { return fn(points); });
-  draw(points.concat(objects));
+  draw(points);
 };
 
 var closestPointToEvt = function (evt) {
@@ -106,4 +107,59 @@ var closestPointToEvt = function (evt) {
   }, false);
 })();
 
-rerender();
+
+var assignmentLine = /([a-zA-Z])\s*=\s*\((-?\d), (-?\d)\)\s*/
+var wedgeLine = /^([a-zA-Z])\s*=\s*(([a-zA-Z]\^)*[a-zA-Z])\s*$/
+function inputChanged (evt) {
+  objects = {};
+
+  var text = input.value;
+  var lines = text.split('\n');
+  
+  var assignmentMatch;
+  var wedgeMatch;
+  var id;
+  for (var i = 0; i < lines.length; i++) {
+    assignmentMatch = lines[i].match(assignmentLine);
+    wedgeMatch = lines[i].match(wedgeLine);
+
+    if (assignmentMatch) {
+      id = assignmentMatch[1];
+      var x = parseFloat(assignmentMatch[2]);
+      var y = parseFloat(assignmentMatch[3]);
+      objects[id] = C2.Ro.point(x, y);
+    }
+
+    if (wedgeMatch) {
+      id = wedgeMatch[1];
+      var ids = wedgeMatch[2].split('^');
+      ids = ids.filter(function (id) {return objects.hasOwnProperty(id);})
+      if (ids.length) {
+        accum = objects[ids[0]];
+        ids.slice(1).forEach(function (id) {
+          accum = accum.op(objects[id]);
+        });
+        objects[id] = accum;
+      }
+    }
+    
+  }
+
+  objectsToPoints();
+  rerender();
+
+}
+
+function objectsToPoints () {
+  points = []
+  for (var id in objects) {
+    if (!objects.hasOwnProperty(id)) continue;
+    points.push(objects[id]);
+  }
+}
+
+var input = document.getElementById('input');
+input.addEventListener('change', inputChanged, false);
+input.addEventListener('keyup', inputChanged, false);
+
+inputChanged();

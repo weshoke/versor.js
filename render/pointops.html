@@ -7,13 +7,25 @@
     <script src="../render/C2Canvas.js"></script>
     
 
+    <style>
+      textarea#input {
+        width: 300px;
+        height: 400px;
+      }
+
+      canvas#c {
+        float: left;
+      }
+    </style>
+
   </head>
   <body>
     <h3>Point ops</h3>
     <canvas id="c" width="800" height="400"></canvas>
-
+    <textarea id="input">a = (0, 0)</textarea>
     <button id="new-point">new point</button>
     <button id="wedge">wedge</button>
+    
     <script src="../render/pointops.js"></script>
   </body>
 </html>
