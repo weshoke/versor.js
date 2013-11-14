@@ -15,7 +15,7 @@ combination
   / geomprod
 
 geomprod
-  = left:scalar "*" right:geomprod { return right + ".gp(" + left + ")"; }
+  = left:scalar "*" right:geomprod { return left + ".gp(" + right + ")"; }
   / left:innerprod "*" right:geomprod { return left + ".gp(" + right + ")"; }
   / innerprod
 
@@ -44,16 +44,15 @@ basisblade
   = chars:([e][1-5]+) { return "C2." + chars.join("") + "(1)"; }
 
 scalar
-  = number:(frac) { return parseFloat(number.join("")); }
-  / number:(frac) { return parseFloat(number.join("")); }
-  / number:(digits) { return parseFloat(number); }
+  = number:(frac) { return "C2.s(" + number + ")"; }
 
 pointliteral
-  = "(" x:combination "," y:combination ")" { return "C2.ro.point(" + x + "," + y + ")"; }
+  = "(" x:frac "," y:frac ")" { return "C2.Ro.point(" + x + "," + y + ")"; }
 
 frac
-  = digits "." digits
-  / "." digits
+  = number:(digits "." digits) { return number.join(""); }
+  / number:("." digits) { return number.join(""); }
+  / digits
 
 digits
   = number:digit+ { return number.join(""); }

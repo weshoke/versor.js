@@ -267,7 +267,7 @@ E3parser = (function(){
           pos = pos1;
         }
         if (result0 !== null) {
-          result0 = (function(offset, left, right) { return right + ".gp(" + left + ")"; })(pos0, result0[0], result0[2]);
+          result0 = (function(offset, left, right) { return left + ".gp(" + right + ")"; })(pos0, result0[0], result0[2]);
         }
         if (result0 === null) {
           pos = pos0;
@@ -636,30 +636,10 @@ E3parser = (function(){
         pos0 = pos;
         result0 = parse_frac();
         if (result0 !== null) {
-          result0 = (function(offset, number) { return parseFloat(number.join("")); })(pos0, result0);
+          result0 = (function(offset, number) { return "C2.s(" + number + ")"; })(pos0, result0);
         }
         if (result0 === null) {
           pos = pos0;
-        }
-        if (result0 === null) {
-          pos0 = pos;
-          result0 = parse_frac();
-          if (result0 !== null) {
-            result0 = (function(offset, number) { return parseFloat(number.join("")); })(pos0, result0);
-          }
-          if (result0 === null) {
-            pos = pos0;
-          }
-          if (result0 === null) {
-            pos0 = pos;
-            result0 = parse_digits();
-            if (result0 !== null) {
-              result0 = (function(offset, number) { return parseFloat(number); })(pos0, result0);
-            }
-            if (result0 === null) {
-              pos = pos0;
-            }
-          }
         }
         return result0;
       }
@@ -680,7 +660,7 @@ E3parser = (function(){
           }
         }
         if (result0 !== null) {
-          result1 = parse_combination();
+          result1 = parse_frac();
           if (result1 !== null) {
             if (input.charCodeAt(pos) === 44) {
               result2 = ",";
@@ -692,7 +672,7 @@ E3parser = (function(){
               }
             }
             if (result2 !== null) {
-              result3 = parse_combination();
+              result3 = parse_frac();
               if (result3 !== null) {
                 if (input.charCodeAt(pos) === 41) {
                   result4 = ")";
@@ -726,7 +706,7 @@ E3parser = (function(){
           pos = pos1;
         }
         if (result0 !== null) {
-          result0 = (function(offset, x, y) { return "C2.ro.point(" + x + "," + y + ")"; })(pos0, result0[1], result0[3]);
+          result0 = (function(offset, x, y) { return "C2.Ro.point(" + x + "," + y + ")"; })(pos0, result0[1], result0[3]);
         }
         if (result0 === null) {
           pos = pos0;
@@ -736,9 +716,10 @@ E3parser = (function(){
       
       function parse_frac() {
         var result0, result1, result2;
-        var pos0;
+        var pos0, pos1;
         
         pos0 = pos;
+        pos1 = pos;
         result0 = parse_digits();
         if (result0 !== null) {
           if (input.charCodeAt(pos) === 46) {
@@ -756,18 +737,25 @@ E3parser = (function(){
               result0 = [result0, result1, result2];
             } else {
               result0 = null;
-              pos = pos0;
+              pos = pos1;
             }
           } else {
             result0 = null;
-            pos = pos0;
+            pos = pos1;
           }
         } else {
           result0 = null;
+          pos = pos1;
+        }
+        if (result0 !== null) {
+          result0 = (function(offset, number) { return number.join(""); })(pos0, result0);
+        }
+        if (result0 === null) {
           pos = pos0;
         }
         if (result0 === null) {
           pos0 = pos;
+          pos1 = pos;
           if (input.charCodeAt(pos) === 46) {
             result0 = ".";
             pos++;
@@ -783,11 +771,20 @@ E3parser = (function(){
               result0 = [result0, result1];
             } else {
               result0 = null;
-              pos = pos0;
+              pos = pos1;
             }
           } else {
             result0 = null;
+            pos = pos1;
+          }
+          if (result0 !== null) {
+            result0 = (function(offset, number) { return number.join(""); })(pos0, result0);
+          }
+          if (result0 === null) {
             pos = pos0;
+          }
+          if (result0 === null) {
+            result0 = parse_digits();
           }
         }
         return result0;
