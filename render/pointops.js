@@ -1,3 +1,5 @@
+var parse = C2parser.parse;
+
 var points = [];
 var objectFunctions = [];
 
@@ -108,8 +110,7 @@ var closestPointToEvt = function (evt) {
 })();
 
 
-var assignmentLine = /([a-zA-Z])\s*=\s*\((-?\d), (-?\d)\)\s*/
-var wedgeLine = /^([a-zA-Z])\s*=\s*(([a-zA-Z]\^)*[a-zA-Z])\s*$/
+var assignmentLine = /([a-zA-Z])\s*=\s*(.*)/
 function inputChanged (evt) {
   objects = {};
 
@@ -121,26 +122,11 @@ function inputChanged (evt) {
   var id;
   for (var i = 0; i < lines.length; i++) {
     assignmentMatch = lines[i].match(assignmentLine);
-    wedgeMatch = lines[i].match(wedgeLine);
 
     if (assignmentMatch) {
       id = assignmentMatch[1];
-      var x = parseFloat(assignmentMatch[2]);
-      var y = parseFloat(assignmentMatch[3]);
-      objects[id] = C2.Ro.point(x, y);
-    }
-
-    if (wedgeMatch) {
-      id = wedgeMatch[1];
-      var ids = wedgeMatch[2].split('^');
-      ids = ids.filter(function (id) {return objects.hasOwnProperty(id);})
-      if (ids.length) {
-        accum = objects[ids[0]];
-        ids.slice(1).forEach(function (id) {
-          accum = accum.op(objects[id]);
-        });
-        objects[id] = accum;
-      }
+      fn = new Function('env', 'return ' + parse(assignmentMatch[2]));
+      objects[id] = fn(objects);
     }
     
   }
