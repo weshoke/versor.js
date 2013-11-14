@@ -42,9 +42,9 @@ pointliteral
   = "(" x:frac "," y:frac ")" { return "C2.Ro.point(" + x + "," + y + ")"; }
 
 frac
-  = number:(digits "." digits) { return number.join(""); }
-  / number:("." digits) { return number.join(""); }
-  / digits
+  = number:("-"? digits "." digits) { return number.join(""); }
+  / number:("-"? "." digits) { return number.join(""); }
+  / number:("-"? digits) { return number.join(""); }
 
 digits
   = number:digit+ { return number.join(""); }

@@ -669,26 +669,41 @@ C2parser = (function(){
       }
       
       function parse_frac() {
-        var result0, result1, result2;
+        var result0, result1, result2, result3;
         var pos0, pos1;
         
         pos0 = pos;
         pos1 = pos;
-        result0 = parse_digits();
-        if (result0 !== null) {
-          if (input.charCodeAt(pos) === 46) {
-            result1 = ".";
-            pos++;
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\".\"");
-            }
+        if (input.charCodeAt(pos) === 45) {
+          result0 = "-";
+          pos++;
+        } else {
+          result0 = null;
+          if (reportFailures === 0) {
+            matchFailed("\"-\"");
           }
+        }
+        result0 = result0 !== null ? result0 : "";
+        if (result0 !== null) {
+          result1 = parse_digits();
           if (result1 !== null) {
-            result2 = parse_digits();
+            if (input.charCodeAt(pos) === 46) {
+              result2 = ".";
+              pos++;
+            } else {
+              result2 = null;
+              if (reportFailures === 0) {
+                matchFailed("\".\"");
+              }
+            }
             if (result2 !== null) {
-              result0 = [result0, result1, result2];
+              result3 = parse_digits();
+              if (result3 !== null) {
+                result0 = [result0, result1, result2, result3];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
             } else {
               result0 = null;
               pos = pos1;
@@ -710,19 +725,34 @@ C2parser = (function(){
         if (result0 === null) {
           pos0 = pos;
           pos1 = pos;
-          if (input.charCodeAt(pos) === 46) {
-            result0 = ".";
+          if (input.charCodeAt(pos) === 45) {
+            result0 = "-";
             pos++;
           } else {
             result0 = null;
             if (reportFailures === 0) {
-              matchFailed("\".\"");
+              matchFailed("\"-\"");
             }
           }
+          result0 = result0 !== null ? result0 : "";
           if (result0 !== null) {
-            result1 = parse_digits();
+            if (input.charCodeAt(pos) === 46) {
+              result1 = ".";
+              pos++;
+            } else {
+              result1 = null;
+              if (reportFailures === 0) {
+                matchFailed("\".\"");
+              }
+            }
             if (result1 !== null) {
-              result0 = [result0, result1];
+              result2 = parse_digits();
+              if (result2 !== null) {
+                result0 = [result0, result1, result2];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
             } else {
               result0 = null;
               pos = pos1;
@@ -738,7 +768,36 @@ C2parser = (function(){
             pos = pos0;
           }
           if (result0 === null) {
-            result0 = parse_digits();
+            pos0 = pos;
+            pos1 = pos;
+            if (input.charCodeAt(pos) === 45) {
+              result0 = "-";
+              pos++;
+            } else {
+              result0 = null;
+              if (reportFailures === 0) {
+                matchFailed("\"-\"");
+              }
+            }
+            result0 = result0 !== null ? result0 : "";
+            if (result0 !== null) {
+              result1 = parse_digits();
+              if (result1 !== null) {
+                result0 = [result0, result1];
+              } else {
+                result0 = null;
+                pos = pos1;
+              }
+            } else {
+              result0 = null;
+              pos = pos1;
+            }
+            if (result0 !== null) {
+              result0 = (function(offset, number) { return number.join(""); })(pos0, result0);
+            }
+            if (result0 === null) {
+              pos = pos0;
+            }
           }
         }
         return result0;
