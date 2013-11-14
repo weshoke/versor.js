@@ -62,8 +62,10 @@ var C2Canvas = function(canvas) {
     Vec: function(el) {
       var rsquared = C2.Ro.size(el);
 
-      var x = mapx(el[0]);
-      var y = mapy(el[1]);
+      var center = C2.Ro.cen(el);
+
+      var x = mapx(center[0]);
+      var y = mapy(center[1]);
       var r = scale(Math.sqrt(Math.abs(rsquared)));
       if (r === 0) r = pointRadius;
 
