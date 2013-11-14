@@ -37,7 +37,6 @@ C2parser = (function(){
      */
     parse: function(input, startRule) {
       var parseFunctions = {
-        "assignment": parse_assignment,
         "combination": parse_combination,
         "geomprod": parse_geomprod,
         "innerprod": parse_innerprod,
@@ -58,7 +57,7 @@ C2parser = (function(){
           throw new Error("Invalid rule name: " + quote(startRule) + ".");
         }
       } else {
-        startRule = "assignment";
+        startRule = "combination";
       }
       
       var pos = 0;
@@ -104,51 +103,6 @@ C2parser = (function(){
         }
         
         rightmostFailuresExpected.push(failure);
-      }
-      
-      function parse_assignment() {
-        var result0, result1, result2;
-        var pos0, pos1;
-        
-        pos0 = pos;
-        pos1 = pos;
-        result0 = parse_blade();
-        if (result0 !== null) {
-          if (input.charCodeAt(pos) === 61) {
-            result1 = "=";
-            pos++;
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"=\"");
-            }
-          }
-          if (result1 !== null) {
-            result2 = parse_combination();
-            if (result2 !== null) {
-              result0 = [result0, result1, result2];
-            } else {
-              result0 = null;
-              pos = pos1;
-            }
-          } else {
-            result0 = null;
-            pos = pos1;
-          }
-        } else {
-          result0 = null;
-          pos = pos1;
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, left, right) { blades[left] = right; })(pos0, result0[0], result0[2]);
-        }
-        if (result0 === null) {
-          pos = pos0;
-        }
-        if (result0 === null) {
-          result0 = parse_combination();
-        }
-        return result0;
       }
       
       function parse_combination() {
@@ -530,7 +484,7 @@ C2parser = (function(){
                   }
                 }
                 if (result0 !== null) {
-                  result1 = parse_assignment();
+                  result1 = parse_combination();
                   if (result1 !== null) {
                     if (input.charCodeAt(pos) === 41) {
                       result2 = ")";
@@ -862,7 +816,7 @@ C2parser = (function(){
           result0 = null;
         }
         if (result0 !== null) {
-          result0 = (function(offset, chars) { return chars.join(""); })(pos0, result0);
+          result0 = (function(offset, chars) { return "env." + chars.join(""); })(pos0, result0);
         }
         if (result0 === null) {
           pos = pos0;
@@ -919,9 +873,6 @@ C2parser = (function(){
         
         return { line: line, column: column };
       }
-      
-      
-        var blades = {};
       
       
       var result = parseFunctions[startRule]();

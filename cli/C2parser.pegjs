@@ -1,13 +1,5 @@
-{
-  var blades = {};
-}
-
 op
-  = assignment
-
-assignment
-  = left:blade "=" right:combination { blades[left] = right; }
-  / combination
+  = combination
 
 combination
   = left:geomprod "+" right:combination { return left + ".add(" + right + ")"; }
@@ -61,4 +53,4 @@ digit
   = [0-9]
 
 blade "blade"
-  = chars:[a-zA-Z0-9]+ { return chars.join(""); }
+  = chars:[a-zA-Z0-9]+ { return "env." + chars.join(""); }
