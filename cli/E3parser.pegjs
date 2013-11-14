@@ -37,6 +37,7 @@ primary
   = basisblade
   / scalar
   / blade
+  / pointliteral
   / "(" op:op ")" { return op; }
 
 basisblade
@@ -46,6 +47,9 @@ scalar
   = number:(frac) { return parseFloat(number.join("")); }
   / number:(frac) { return parseFloat(number.join("")); }
   / number:(digits) { return parseFloat(number); }
+
+pointliteral
+  = "(" x:combination "," y:combination ")" { return "C2.ro.point(" + x + "," + y + ")"; }
 
 frac
   = digits "." digits
