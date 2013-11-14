@@ -10,8 +10,7 @@
 <button class="draw">draw</button>
 
 <canvas id="c" width="800" height="400"></canvas>
-<script src="../E3.js"></script>
-<script src="E3parser.js"></script>
+<script src="C2parser.js"></script>
 
 <script src="../versor.js"></script>
 <script src="../C2.js"></script>
@@ -19,9 +18,9 @@
 
 <script>
 
-var parse = E3parser.parse;
+var parse = C2parser.parse;
 var run = function(code) {
-  var js = E3parser.parse(code);
+  var js = C2parser.parse(code);
   return eval(js);
 };
 
