@@ -704,7 +704,13 @@ Space.prototype.generateType = function(name) {
 		"}",
 		"",
 		model.classname+".prototype.sp = function(b) {",
-		"\tvar v = b.inverse().gp(this).gp(b);",
+		//"\tvar v = b.inverse().gp(this).gp(b);",
+		"\tvar v = b.gp(this).gp(b.reverse());",
+		"\treturn "+"new this.__proto__.constructor(v);",
+		"}",
+		"",
+		model.classname+".prototype.re = function(b) {",
+		"\tvar v = b.gp(this.involute()).gp(b.reverse());",
 		"\treturn "+"new this.__proto__.constructor(v);",
 		"}",
 		"",
@@ -837,18 +843,12 @@ Space.prototype.binopResultType = function(opname, tyname1, tyname2) {
 }
 
 Space.prototype.generateBinop = function(opname, tyname1, tyname2) {
-	var ty1 = this.types[tyname1]	
-	var ty2 = this.types[tyname2]	
+	var ty1 = this.types[tyname1];
+	var ty2 = this.types[tyname2];
 	
 	var op = this.productList(ty1.bases, ty2.bases, opname);
-	var tynameRes
-	if(op.blades.length == 0) {
-		tynameRes = "s";
-	}
-	else {
-	 	tynameRes = this.createType(op.blades, tyname1+tyname2+"_"+opname, false);
-	}
-	
+	var tynameRes = this.binopResultType(opname, tyname1, tyname2);
+
 	var tyRes = this.types[tynameRes];
 	if(!tyRes) {
 		console.log("ERROR: gentype " + tyname1+tyname2+"_"+opname, op.blades);
@@ -1076,40 +1076,6 @@ Space.prototype.isSubType = function(tyname1, tyname2) {
 	return true;
 }
 
-/*
-var C3 = new Space({
-	metric:[1, 1, 1, 1, -1],
-	types: [
-		{ name:"Vec3", bases:["e1", "e2", "e3"] },
-		{ name:"Biv3", bases:["e12", "e13", "e23"] },
-		{ name:"Rot", bases:["s", "e12", "e13", "e23"] },
-		{ name:"Pnt", bases:["e1", "e2", "e3", "e4", "e5"] },
-		{ name:"Dlp", bases:["e1", "e2", "e3", "e5"] },
-		{ name:"Pln", bases:["e1235", "e1245", "e1345", "e2345"] },
-		{ name:"Sph", bases:["e1235", "e1234", "e1245", "e1345", "e2345"] },
-		{ name:"Dln", bases:["e12", "e13", "e23", "e15", "e25", "e35"] },
-		{ name:"Lin", bases:["e145", "e245", "e345", "e125", "e135", "e235"] },
-		{ name:"Flp", bases:["e15", "e25", "e35", "e45"] },
-		{ name:"Par", bases:["e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
-		{ name:"Cir", bases:["e123", "e145", "e245", "e345", "e124", "e134", "e234", "e125", "e135", "e235"] },
-		{ name:"Bst", bases:["s", "e12", "e13", "e23", "e14", "e24", "e34", "e15", "e25", "e35", "e45"] },
-		{ name:"Dil", bases:["s", "e45"] },
-		{ name:"Mot", bases:["s", "e12", "e13", "e23", "e15", "e25", "e35", "e1235"] },
-		{ name:"Trs", bases:["s", "e14", "e24", "e34"] },
-		{ name:"Drv", bases:["e15", "e25", "e35"] },
-		{ name:"Drb", bases:["e125", "e135", "e235"] },
-		{ name:"Tri3", bases:["e123"] },
-	],
-	conformal:true
-});
-
-function nullPnt(a, b, c) {
-	return C3.Pnt(a, b, c, 1, (a*a+b*b+c*c)*0.5);
-}
-var p1 = nullPnt(1, 0, 0);
-console.log(p1.toString());
-console.log(C3.Vec3(p1).toString());
-*/
 return {
 	create: function(props) {
 		return new Space(props);

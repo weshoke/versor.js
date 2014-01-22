@@ -91,6 +91,30 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	console.log(pp.toString());
 	//console.log(C3.e4(1).op(C3.e5(1)).toString());
 
+
+	wt = function(el) {
+		return el.ip(el)[0];
+	}
+	
+	mag = function(el) {
+		return Math.sqrt(Math.abs(wt(el)));
+	}
+	
+	var r1 = C3.Rot(1, 0, 0, 0);
+	var r2 = C3.Rot(0, 1, 0, 0);
+	var r3 = C3.Rot(0, 0, 1, 0);
+	
+	var v = 0.999
+	var r4 = C3.Rot(Math.sqrt(1-v*v), 0, v, 0);
+
+	console.log("");	
+	console.log(r1.div(r2).toString());
+	console.log(r3.div(r2).toString());
+	console.log(r3.div(r4).toString());
+	console.log(r4.toString());
+	console.log(r4[0]*r4[0]+r4[2]*r4[2]);
+	console.log(mag(r4));
+
 	/*
 	console.log(sqd(p1, p2));
 	console.log(dst(p1, p2));

@@ -42,13 +42,18 @@ C2.Ro = {
 		var v2 = a.gp(a.involute()).gp(v1.gp(v1).inverse());
 		return a.isdual() ? -v2[0] : v2[0];
 	},
+	radius: function(a) {
+		var size = C2.Ro.size(a);
+		if(size < 0) return -Math.sqrt(-size);
+		else return Math.sqrt(size);
+	},
 	cen: function(a) {
 		var v = C2.Inf.ip(a);
 		return C2.Pnt(a.gp(C2.Inf).gp(a).div(v.gp(v).gp(-2)));
 	},
 	// squared distance
 	sqd: function(a, b) {
-		return -a.ip(b)[0];
+		return -a.ip(b)[0]*2;
 	},
 	// distance
 	dst: function(a, b) {
@@ -127,6 +132,12 @@ C2.Op = {
 		var res = C2.Bst(pp.gp(sn));
 		res[0] = cn;
 		return res;
+	},
+	rj: function(a, b) {
+		return a.op(b).div(b);
+	},
+	pj: function(a, b) {
+		return a.ip(b).div(b);
 	}
 };
 
@@ -140,18 +151,54 @@ C2.Ta = {
 }
 
 C2.Dr = {
+	direction: function(x, y) {
+		return C2.Drv(x, y);
+	},
 	elem: function(d) {
 		return C2.Ori.ip(d.involute());
 	}
 }
 
+C2.dot = function(el) {
+	return el.ip(el);
+}
+
+C2.rdot = function(el) {
+	return el.ip(el.reverse());
+}
+
 C2.wt = function(el) {
-	return el.ip(el)[0];
+	return C2.dot(el, el)[0];
+}
+
+C2.rwt = function(el) {
+	return C2.rdot(el, el)[0];
+}
+
+C2.norm = function(el) {
+	var a = C2.rwt(el);
+	if(a < 0) return 0;
+	return Math.sqrt(a);
+}
+
+C2.rnorm = function(el) {
+	var a = C2.rwt(el);
+	if(a < 0) return -Math.sqrt(-a);
+	return Math.sqrt(a);
+}
+
+C2.mag = function(el) {
+	return Math.sqrt(Math.abs(C2.wt(el)));
 }
 
 C2.unit = function(el) {
-	var mag = Math.sqrt(Math.abs(C2.wt(el)))
-	return C2.gp(el, 1/mag);
+	var mag = C2.mag(el);
+	return el.gp(1/mag);
+}
+
+C2.runit = function(el) {
+	var mag = C2.rnorm(el);
+	return el.gp(1/mag);
 }
 
 C2.dual = function (el) {

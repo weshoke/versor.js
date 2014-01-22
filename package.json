@@ -28,5 +28,8 @@
   },
   "devDependencies": {
     "pegjs": "~0.7.0"
+  },
+  "dependencies": {
+    "express": "3.3.4"
   }
 }

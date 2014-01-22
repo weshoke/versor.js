@@ -57,6 +57,8 @@ var C2 = versor.create({
 	conformal:true
 });
 
+console.log(C2.basis);
+
 document.addEventListener("DOMContentLoaded", function(evt) {
 	var Ori = C2.e3(1);
 	var Inf = C2.e4(1);
@@ -144,8 +146,8 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	
 	
 	var L1 = Ro.point(0, 0).op(Ro.point(1, 0)).op(Inf);
-	console.log(L1.toString());
-	console.log(dual(L1).toString());
+	//console.log(L1.toString());
+	//console.log(dual(L1).toString());
 	
 	
 	function circleRadius(c) {
@@ -199,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 		c = boost.sp(c);
 	}
 	var x = c.add(pp);
-	console.log("Xxx:", x);
+	//console.log("Xxx:", x);
 	
 	
 	var w=600;
