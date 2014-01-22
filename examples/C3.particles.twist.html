@@ -179,9 +179,9 @@ function Along(dll, period, pitch) {
 	return tb.add(drv);
 }
 
-//var L = C3.Fl.line(C3.Ro.point(0, 0, 0), C3.Ro.point(0.025, 0.05, 0.15));
+var L = C3.Fl.line(C3.Ro.point(0, 0, 0), C3.Ro.point(0.025, 0.05, 0.15));
 //var L = C3.Fl.line(C3.Ro.point(0, 0, 0), C3.Ro.point(0.025, 0.05, 0));
-var L = C3.Fl.line(C3.Ro.point(0, 0.7, 0), C3.Ro.point(0.025, 0.7, 0));
+//var L = C3.Fl.line(C3.Ro.point(0, 0.7, 0), C3.Ro.point(0.025, 0.7, 0));
 console.log(L.toString());
 L = C3.undual(Along(C3.dual(L), 0.028, 0.38));
 
@@ -194,7 +194,7 @@ setup.scene.add(createElementGlyph(L));
 
 var generator = new LineGenerator(C3.dual(L));
 var bounds = new BoundingBox(new THREE.Vector3(0, 0, 0), 3);
-var particleSystem = createParticleSystem(1800);
+var particleSystem = createParticleSystem(3800);
 
 
 setup.scene.add(particleSystem);
