@@ -1,0 +1,218 @@
+<html>
+	<head>
+		<title>Tesselations</title>
+		<style>canvas { width: 100%; height: 100% }</style>
+	</head>
+	<body>
+		<script src="three.js"></script>
+		<script src="TrackballControls.js"></script>
+		<script src="../versor.js"></script>
+		<script src="../C3.js"></script>
+		<script>
+		
+var ThreeSetup = function() {
+	this.scene = new THREE.Scene();
+	this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+	this.controls = new THREE.TrackballControls(this.camera);
+	this.renderer = new THREE.WebGLRenderer({ antialias:true });
+	
+	this.initControls();
+	this.initRenderer();
+	this.initCamera();
+}
+
+ThreeSetup.prototype.initControls = function() {
+	this.controls.rotateSpeed = 1.0;
+	this.controls.zoomSpeed = 1.2;
+	this.controls.panSpeed = 1.8;
+	this.controls.noZoom = false;
+	this.controls.noPan = false;
+	this.controls.staticMoving = true;
+	this.controls.dynamicDampingFactor = 0.3;
+	this.controls.keys = [ 65, 83, 68 ];
+}
+
+ThreeSetup.prototype.initRenderer = function() {
+	this.renderer.setClearColor(0xeeeeee);
+	this.renderer.setSize(window.innerWidth, window.innerHeight);
+	document.body.appendChild(this.renderer.domElement);
+}
+
+ThreeSetup.prototype.initCamera = function() {
+	this.camera.position.z = 2;
+}
+
+ThreeSetup.prototype.resize = function() {
+	this.camera.aspect = window.innerWidth/window.innerHeight;
+	this.camera.updateProjectionMatrix();
+	this.renderer.setSize(window.innerWidth, window.innerHeight);
+	this.controls.handleResize();
+}
+
+ThreeSetup.prototype.render = function() {
+	this.controls.update();
+	this.renderer.render(this.scene, this.camera);
+}
+
+// Three <----> C3 conversion functions
+function Vector3ToPnt(v) {
+	return C3.Ro.point(v.x, v.y, v.z);
+}
+
+function PntToVector3(p) {
+	return new THREE.Vector3(p[0], p[1], p[2]);
+}
+
+
+
+// create the scene
+function createElementGlyph(line) {
+	var p1 = C3.Fl.loc(line, C3.Ro.point(0, 0, 0));
+	var dir = PntToVector3(C3.Fl.dir(line)).normalize();
+	var v1 = PntToVector3(p1).sub(dir);
+	var v2 = PntToVector3(p1).add(dir);
+
+	var geometry = new THREE.Geometry();
+	geometry.vertices.push(v1);
+	geometry.vertices.push(v2);
+	
+	var material = new THREE.LineBasicMaterial({color: 0xff0055, linewidth:13});
+	return new THREE.Line(geometry, material);
+}
+
+
+function createParticle(p) {
+	var pX = Math.random()*2-1
+	var pY = 0//Math.random()*0.5-0.25;
+	var pZ = 0;//Math.random() * 2 - 1;
+	if(p) {
+		p.x = pX;
+		p.y = pY;
+		p.z = pZ;
+		return p;
+	}
+	else {
+		return new THREE.Vector3(pX, pY, pZ)
+	}
+}
+
+function createParticleSystem(size) {
+	var map = THREE.ImageUtils.loadTexture("particle.png");
+	map.premultiplyAlpha = true;
+	
+	var material = new THREE.ParticleBasicMaterial({
+		color: 0xffffff,
+		size: 0.1,
+		map: map,
+		blendEquation: THREE.ReverseSubtractEquation,
+		blending: THREE.SubtractiveBlending,
+		transparent: true,
+		depthTest: true,
+		depthWrite: false,
+	});
+	
+	var particles = new THREE.Geometry();
+	for (var i=0; i < size; ++i) {
+		particles.vertices.push(createParticle());
+	}
+
+	return new THREE.ParticleSystem(
+		particles,
+		material
+	);
+}
+
+var LineGenerator = function(dll, amt) {
+	this.generator = C3.Gen.mot(dll);
+}
+
+LineGenerator.prototype.apply = function(p) {
+	var pnt = Vector3ToPnt(p);
+	var pnt2 = pnt.sp(dil).normalize();
+	p.x = pnt2[0];
+	p.y = pnt2[1];
+	p.z = pnt2[2];
+}
+
+LineGenerator.prototype.applySystem = function(particleSystem) {
+	for(var i=0; i < particleSystem.geometry.vertices.length; ++i) {
+		var p = particleSystem.geometry.vertices[i];
+		var pnt = Vector3ToPnt(p);
+		var pnt2 = pnt.sp(this.generator).normalize();
+		p.x = pnt2[0];
+		p.y = pnt2[1];
+		p.z = pnt2[2];
+	}
+	particleSystem.geometry.verticesNeedUpdate = true;
+}
+
+
+var BoundingBox = function(center, size) {
+	this.center = center;
+	this.size = size;
+}
+
+BoundingBox.prototype.applySystem = function(particleSystem) {
+	var needsUpdate = particleSystem.geometry.verticesNeedUpdate;
+	for(var i=0; i < particleSystem.geometry.vertices.length; ++i) {
+		var p = particleSystem.geometry.vertices[i];
+		var from = p.clone().sub(this.center);
+		if(
+			Math.abs(from.x) > this.size ||
+			Math.abs(from.y) > this.size ||
+			Math.abs(from.z) > this.size
+		) {
+			createParticle(p)
+			needsUpdate = true;
+		}
+	}
+	particleSystem.geometry.verticesNeedUpdate = needsUpdate;
+}
+
+function Along(dll, period, pitch) {
+	var td = C3.runit(dll).gp(period);
+	var tb = C3.Biv3(td);
+	var tv = C3.Drv(td);
+	
+	var dir = C3.duale(tb);	// Vec3
+	var drv = tv.sub(dir.op(C3.Inf).gp(pitch));
+	return tb.add(drv);
+}
+
+//var L = C3.Fl.line(C3.Ro.point(0, 0, 0), C3.Ro.point(0.025, 0.05, 0.15));
+//var L = C3.Fl.line(C3.Ro.point(0, 0, 0), C3.Ro.point(0.025, 0.05, 0));
+var L = C3.Fl.line(C3.Ro.point(0, 0.7, 0), C3.Ro.point(0.025, 0.7, 0));
+console.log(L.toString());
+L = C3.undual(Along(C3.dual(L), 0.028, 0.38));
+
+console.log(L.toString());
+
+
+var glyphRadius = 0.2;
+var setup = new ThreeSetup();
+setup.scene.add(createElementGlyph(L));
+
+var generator = new LineGenerator(C3.dual(L));
+var bounds = new BoundingBox(new THREE.Vector3(0, 0, 0), 3);
+var particleSystem = createParticleSystem(1800);
+
+
+setup.scene.add(particleSystem);
+
+window.addEventListener('resize', onWindowResize, false)
+function onWindowResize() {
+	setup.resize();
+}
+
+function render() {
+	requestAnimationFrame(render);
+	generator.applySystem(particleSystem);
+	bounds.applySystem(particleSystem);
+	setup.render();
+}
+render();
+
+
+		</script>
+	</body>
+</html

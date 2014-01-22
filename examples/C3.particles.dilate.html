@@ -1,0 +1,177 @@
+<html>
+	<head>
+		<title>Tesselations</title>
+		<style>canvas { width: 100%; height: 100% }</style>
+	</head>
+	<body>
+		<script src="three.js"></script>
+		<script src="TrackballControls.js"></script>
+		<script src="../versor.js"></script>
+		<script src="../C3.js"></script>
+		<script>
+		
+var ThreeSetup = function() {
+	this.scene = new THREE.Scene();
+	this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+	this.controls = new THREE.TrackballControls(this.camera);
+	this.renderer = new THREE.WebGLRenderer({ antialias:true });
+	
+	this.initControls();
+	this.initRenderer();
+	this.initCamera();
+}
+
+ThreeSetup.prototype.initControls = function() {
+	this.controls.rotateSpeed = 1.0;
+	this.controls.zoomSpeed = 1.2;
+	this.controls.panSpeed = 1.8;
+	this.controls.noZoom = false;
+	this.controls.noPan = false;
+	this.controls.staticMoving = true;
+	this.controls.dynamicDampingFactor = 0.3;
+	this.controls.keys = [ 65, 83, 68 ];
+}
+
+ThreeSetup.prototype.initRenderer = function() {
+	this.renderer.setClearColor(0xeeeeee);
+	this.renderer.setSize(window.innerWidth, window.innerHeight);
+	document.body.appendChild(this.renderer.domElement);
+}
+
+ThreeSetup.prototype.initCamera = function() {
+	this.camera.position.z = 2;
+}
+
+ThreeSetup.prototype.resize = function() {
+	this.camera.aspect = window.innerWidth/window.innerHeight;
+	this.camera.updateProjectionMatrix();
+	this.renderer.setSize(window.innerWidth, window.innerHeight);
+	this.controls.handleResize();
+}
+
+ThreeSetup.prototype.render = function() {
+	this.controls.update();
+	this.renderer.render(this.scene, this.camera);
+}
+
+// Three <----> C3 conversion functions
+function Vector3ToPnt(v) {
+	return C3.Ro.point(v.x, v.y, v.z);
+}
+
+function PntToVector3(p) {
+	return new THREE.Vector3(p[0], p[1], p[2]);
+}
+
+
+
+// create the scene
+function createElementGlyph(radius) {
+	var geometry = new THREE.SphereGeometry(radius, 35, 35);
+	var material = new THREE.MeshBasicMaterial({color: 0xff0055});
+	return new THREE.Mesh(geometry, material);
+}
+
+function createParticleSystem(size) {
+	var map = THREE.ImageUtils.loadTexture("particle.png");
+	map.premultiplyAlpha = true;
+	
+	var material = new THREE.ParticleBasicMaterial({
+		color: 0xffffff,
+		size: 0.1,
+		map: map,
+		blendEquation: THREE.ReverseSubtractEquation,
+		blending: THREE.SubtractiveBlending,
+		transparent: true,
+		depthTest: true,
+		depthWrite: false,
+	});
+	
+	var particles = new THREE.Geometry();
+	for (var i=0; i < size; ++i) {
+		var pX = Math.random() * 2 - 1;
+		var pY = Math.random() * 2 - 1;
+		var pZ = Math.random() * 2 - 1;
+		particles.vertices.push(new THREE.Vector3(pX, pY, pZ));
+	}
+
+	return new THREE.ParticleSystem(
+		particles,
+		material
+	);
+}
+
+var DilatorGenerator = function(amt) {
+	this.generator = C3.Gen.dil(amt);
+}
+
+DilatorGenerator.prototype.apply = function(p) {
+	var pnt = Vector3ToPnt(p);
+	var pnt2 = pnt.sp(dil).normalize();
+	p.x = pnt2[0];
+	p.y = pnt2[1];
+	p.z = pnt2[2];
+}
+
+DilatorGenerator.prototype.applySystem = function(particleSystem) {
+	for(var i=0; i < particleSystem.geometry.vertices.length; ++i) {
+		var p = particleSystem.geometry.vertices[i];
+		var pnt = Vector3ToPnt(p);
+		var pnt2 = pnt.sp(this.generator).normalize();
+		p.x = pnt2[0];
+		p.y = pnt2[1];
+		p.z = pnt2[2];
+	}
+	particleSystem.geometry.verticesNeedUpdate = true;
+}
+
+
+var BoundingSphere = function(center, radius) {
+	this.center = center;
+	this.radius = radius;
+}
+
+BoundingSphere.prototype.applySystem = function(particleSystem) {
+	var needsUpdate = particleSystem.geometry.verticesNeedUpdate;
+	for(var i=0; i < particleSystem.geometry.vertices.length; ++i) {
+		var p = particleSystem.geometry.vertices[i];
+		var from = p.clone().sub(this.center);
+		if(from.lengthSq() > this.radius) {
+			p.x = Math.random() * 2 - 1;
+			p.y = Math.random() * 2 - 1;
+			p.z = Math.random() * 2 - 1;
+			needsUpdate = true;
+		}
+	}
+	particleSystem.geometry.verticesNeedUpdate = needsUpdate;
+}
+
+
+var glyphRadius = 0.2;
+var setup = new ThreeSetup();
+setup.scene.add(createElementGlyph(glyphRadius));
+
+var generator = new DilatorGenerator(0.01);
+var bounds = new BoundingSphere(new THREE.Vector3(0, 0, 0), 10);
+var particleSystem = createParticleSystem(1800);
+
+
+setup.scene.add(particleSystem);
+
+window.addEventListener('resize', onWindowResize, false)
+function onWindowResize() {
+	setup.resize();
+}
+
+function render() {
+	requestAnimationFrame(render);
+	generator.applySystem(particleSystem);
+	bounds.applySystem(particleSystem);
+	setup.render();
+}
+render();
+
+
+		</script>
+	</body>
+</html
