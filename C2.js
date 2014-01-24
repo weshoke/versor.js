@@ -64,7 +64,7 @@ C2.Ro = {
 	},
 	// split a point pair into its 2 points, returns an array
 	split: function(pp) {
-		var r = C2.Ro.dst(pp, pp);
+		var r = Math.sqrt( Math.abs( pp.ip(pp)[0]  ))//C2.Ro.dst(pp, pp);
 		var dlp = C2.e4(-1).ip(pp);
 		var bstA = C2.Bst(pp);
 		var bstB = C2.Bst(pp);
