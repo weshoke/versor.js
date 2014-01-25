@@ -8,6 +8,7 @@
 		<script src="TrackballControls.js"></script>
 		<script src="../versor.js"></script>
 		<script src="../C3.js"></script>
+		<script src="numeric-1.2.6.min.js"></script>
 		<script>
 		
 var ThreeSetup = function() {
@@ -170,6 +171,23 @@ function render() {
 	setup.render();
 }
 render();
+
+
+console.log(numeric.solve([[1,2],[3,4]],[17,39]));
+
+var A = [
+	[0, 1, 2],
+	[1, 2, 3],
+	[10, 20, 30]
+];
+var sA = numeric.ccsSparse(A);
+console.log(sA);
+for(var i=0; i < 5; ++i) {
+for(var j=0; j < 5; ++j) {
+	console.log(i, j, numeric.get(sA, [i, j]));
+}
+}
+
 
 
 		</script>
