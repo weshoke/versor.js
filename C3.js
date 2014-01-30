@@ -75,7 +75,7 @@ C3.Ro = {
 	},
 	// squared distance
 	sqd: function(a, b) {
-		return -a.ip(b)[0];
+		return -2.0 * a.ip(b)[0];
 	},
 	// distance
 	dst: function(a, b) {
