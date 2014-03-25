@@ -1,0 +1,417 @@
+<html>
+	<head>
+		<title>Tesselations</title>
+		<style>canvas { width: 100%; height: 100% }</style>
+	</head>
+	<body>
+		<script src="three.js"></script>
+		<script src="TrackballControls.js"></script>
+		<script src="../versor.js"></script>
+		<script src="../C3.js"></script>
+		<script>
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+var controls = new THREE.TrackballControls(camera);
+controls.rotateSpeed = 1.0;
+controls.zoomSpeed = 1.2;
+controls.panSpeed = 1.8;
+controls.noZoom = false;
+controls.noPan = false;
+controls.staticMoving = true;
+controls.dynamicDampingFactor = 0.3;
+controls.keys = [ 65, 83, 68 ];
+
+var renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setClearColor(0xeeeeee);
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild(renderer.domElement);
+
+var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+hemiLight.position.set( 0, 500, 0 );
+scene.add(hemiLight);
+
+function Vector3ToPnt(v) {
+	return C3.Ro.point(v.x, v.y, v.z);
+}
+
+function PntToVector3(p) {
+	return new THREE.Vector3(p[0], p[1], p[2]);
+}
+
+function vec2sph(tv) {
+	var r = C3.norm(tv);
+	return [
+		Math.atan2(tv[2], tv[0]),
+		Math.acos(-tv[1]/r)-Math.PI/2,
+		r
+	];
+}
+
+function feq(a, b, eps) {
+	return Math.abs(a-b) <= eps;
+}
+
+
+// assume a and b are normalized
+function Gen_ratio_vec(a, b) {
+	var s = a.ip(b)[0];
+	if(feq(s, -1, 1e-7)) {
+		return C3.Gen.rot(a.op(C3.Vec3(0, 1, 0)).gp(Math.PI/2));
+	}
+	
+	var ss = 2*(s+1);
+	var n = (ss >= 0) ? Math.sqrt(ss) : 0;
+	var r = b.gp(a);
+	
+	r[0] += 1;
+	if(n != 0) r = r.gp(1/n);
+	if(C3.norm(r) == 0) return C3.Rot(1, 0, 0, 0);
+	return r;
+}
+
+var VEC_X = C3.Vec3(1, 0, 0);
+var VEC_Y = C3.Vec3(0, 1, 0);
+var VEC_Z = C3.Vec3(0, 0, 1);
+var BIV_XZ = C3.Biv3(0, 1, 0);
+
+function Ro_vec(c, theta) {
+	var axis = C3.runit(C3.Inf.ip(c));
+	return VEC_X.sp(Gen_ratio_vec(C3.duale(BIV_XZ), C3.duale(C3.Biv3(axis))).gp(C3.Gen.rot(BIV_XZ.gp(theta))));
+}
+
+function Gen_bst_tnv(tnv, drv, t) {
+	var s = C3.Par(tnv).sp(C3.Op.trs(drv[0], drv[1], drv[2]));
+	return C3.Op.bst(s.gp(t));
+}
+
+function HopfFiber(handedness) {
+	this.handedness = handedness||"right";
+	this.phase = 0;
+	this.cir = C3.Ro.circle(C3.Ro.point(0, 0, 0), C3.Drv(0, 1, 0), 1);
+	this.vec = C3.Vec3(0, 1, 0);
+}
+
+HopfFiber.prototype.dll = function() {
+	return C3.runit(C3.Inf.ip(this.cir));
+}
+
+// theta from -1 to 1, phi from -0.5 to 0.5
+HopfFiber.prototype.fiberFromAngles = function(theta, phi) {
+	var ptheta = Math.PI/2*theta;
+	var pphi = phi+0.5;
+	
+	var v = Ro_vec(this.cir, ptheta).gp(1/C3.Ro.radius(this.cir));
+	var c = C3.Vec3(C3.Ro.cen(this.cir));
+	
+	var tnv = C3.Tnv(v[0], v[1], v[2]);
+	var bst = Gen_bst_tnv(tnv, c, 1);
+	var lim = this.cir.sp(bst);
+	var mot = C3.Gen.ratio(C3.runit(C3.dual(lim)), this.dll(), pphi);
+	
+	return this.cir.sp(mot.gp(
+		Gen_bst_tnv(tnv, c, pphi)
+	));
+}
+
+HopfFiber.prototype.fiber = function(v) {
+	var cs = vec2sph(v);
+	return this.fiberFromAngles(cs[0]/Math.PI, cs[1]/Math.PI);
+}
+
+
+function TorusKnot(P, Q, amt) {
+	this.P = P||3;
+	this.Q = Q||2;
+	this.amt = amt||0.01;
+}
+
+TorusKnot.prototype.par = function() {
+	var a =  this.P==0 ? 0 : Math.PI/this.P;
+	var b = this.Q==0 ? 0 : Math.PI/this.Q;
+}
+
+TorusKnot.prototype.bst = function(t) {
+	if(t === undefined) {
+		return C3.Op.bst(this.par().gp(amt));
+	}
+	else {
+		amt = t;
+		return this.bst();
+	}
+}
+
+TorusKnot.prototype.calc = function(p) {
+	var tbst = this.bst()
+}
+
+/*
+void calc( const Pnt& p){
+    Pnt np = p; 
+    Bst tbst = bst();
+    for (int i = 0; i < iter(); ++ i ){
+      np = Ro::loc( np.sp( tbst ) );  
+      add(np);
+    }
+    
+              
+    //Tube Neighborhood  
+    int tnum = iter();
+    for (int i = 0; i < tnum; ++i ){ 
+      double t = -1 + 2.0 * i/ tnum;
+          double tt = 1 + t * t;
+          int idx = i < tnum -1 ? i + 1 : 0;  
+      Par tpar = pnt[i] ^ pnt[idx];
+      Cir c = tpar.dual();//.dil(tk.pnt[i], );
+      add ( c );
+    }
+  }
+
+  //calculate full orbit from point p without normalizing each step
+  void calc0( const Pnt& p){
+    Pnt np = p; 
+    Bst tbst = bst();
+    for (int i = 0; i < iter(); ++ i ){
+      np = np.sp( tbst ) ;  
+      add( Ro::loc( np) );
+    }       
+  }
+
+var a = C3.Ro.point(2, 0, 0)
+*/
+
+function circleGeometry(N) {
+	var geometry = new THREE.Geometry();
+	for(var i=0; i <= N; ++i) {
+		var theta = i*Math.PI*2/N;
+		var v = new THREE.Vector3(Math.cos(theta), 0, Math.sin(theta));
+		geometry.vertices.push(v);
+	}
+	return geometry;
+}
+
+function lineGeometry() {
+	var geometry = new THREE.Geometry();
+	geometry.vertices.push(new THREE.Vector3(0, -1000, 0));
+	geometry.vertices.push(new THREE.Vector3(0, 1000, 0));
+	return geometry;
+}
+
+var CIRCLE_GEOMETRY = circleGeometry(140);
+var LINE_GEOMETRY = lineGeometry();
+
+
+function circleMesh(color) {
+	color = color||0x00aaff;
+	var geometry = CIRCLE_GEOMETRY;
+	var lineMaterial = new THREE.LineBasicMaterial({color: color, linewidth:1});
+	var circle = new THREE.Line(geometry, lineMaterial);
+	return circle;
+}
+
+function lineMesh(color) {
+	color = color||0x00aaff;
+	var geometry = LINE_GEOMETRY;
+	var lineMaterial = new THREE.LineBasicMaterial({color: color, linewidth:1});
+	var circle = new THREE.Line(geometry, lineMaterial);
+	return circle;
+}
+
+
+applyQuat = function(g, q) {
+	g.quaternion.copy(q);
+	g.updateMatrix();
+	g.updateMatrixWorld();
+}
+
+transform = function(g, pos, q, s) {
+	g.position = pos;
+	g.quaternion = q;
+	g.scale = new THREE.Vector3(s, s, s);
+	g.updateMatrix();
+	g.updateMatrixWorld();
+}
+
+transformCircle = function(g, c) {
+	var pos = PntToVector3(C3.Ro.loc(c));
+	var b = C3.unit(C3.duale(C3.Dr.elem(C3.Fl.dir(C3.Ro.car(c)))));
+	var R = Gen_ratio_vec(VEC_Y, b);
+	var q = new THREE.Quaternion(R[3], R[2], R[1], R[0]);
+	var s = C3.Ro.radius(c);
+	if(isNaN(s)) {
+		if(g.geometry !== LINE_GEOMETRY) {
+			var newg = lineMesh();
+			newg.material = g.material
+			g = newg;
+		}
+		transform(g, new THREE.Vector3(0, 0, 0), new THREE.Quaternion(), 1);
+	}
+	else {
+		if(g.geometry !== CIRCLE_GEOMETRY) {
+			var newg = circleMesh();
+			newg.material = g.material
+			g = newg;
+		}
+		transform(g, pos, q, s);
+	}
+	return g;
+}
+
+function hopfColor(p) {
+	var theta = Math.atan2(p[2], p[0]);
+	var phi = Math.acos(p[1]);
+	var color = new THREE.Color();
+	var h = (theta+Math.PI)/(2*Math.PI);
+	var s = 1;
+	var l = 1-phi/Math.PI;
+	color.setHSL(h, s, l);
+	return color.getHex();
+}
+
+function HopfMap() {
+	this.map = new THREE.Object3D();
+	this.map.position = new THREE.Vector3(-3, 0, 0);
+	this.map.scale = new THREE.Vector3(0.3, 0.3, 0.3);
+	this.sphere = this.makeSphere();
+	this.map.add(this.sphere);
+	scene.add(this.map);
+}
+
+var SPHERE_POINT_GEOMETRY = new THREE.SphereGeometry(0.05, 32, 32);
+HopfMap.prototype.makeSphere = function() {
+	var geo = new THREE.SphereGeometry(1, 32, 32);
+	var mtl = new THREE.MeshBasicMaterial({
+		color: 0xdddddd,
+		depthTest: false,
+		depthWrite: false
+	});
+	var sphere = new THREE.Mesh(geo, mtl);
+	sphere.renderDepth = 0;
+	return sphere;
+}
+
+HopfMap.prototype.addPoint = function(pt) {
+	var mtl = new THREE.MeshBasicMaterial({ color: pt.getColor() });
+	var P = new THREE.Mesh(SPHERE_POINT_GEOMETRY, mtl);
+	P.position = PntToVector3(pt.position);
+	this.map.add(P);
+	return P;
+}
+
+HopfMap.prototype.removePoint = function(P) {
+	this.map.remove(P);
+}
+
+
+var hopf = new HopfFiber();
+var hopfMap = new HopfMap(1);
+
+
+function HopfPoint(p) {
+	this.position = p;
+	this.circle = hopf.fiber(C3.unit(p));
+	this.mesh = transformCircle(circleMesh(hopfColor(p)), this.circle);
+	this.add();
+}
+
+HopfPoint.prototype.moveTo = function(p) {
+	this.position = p;
+	this.circle = hopf.fiber(C3.unit(C3.Vec3(p)));
+	var mesh = transformCircle(this.mesh, this.circle);
+	
+	var color = this.getColor();
+	if(mesh !== this.mesh) {
+		this.remove();
+		this.mesh = mesh;
+		this.add();
+	}
+	else {
+		this.mapPoint.position = PntToVector3(this.position);
+		this.mapPoint.material.color.setHex(color);
+	}
+	this.mesh.material.color.setHex(color);
+}
+
+HopfPoint.prototype.getColor = function() {
+	return hopfColor(this.position);
+}
+
+HopfPoint.prototype.add = function() {
+	scene.add(this.mesh);
+	this.mapPoint = hopfMap.addPoint(this);
+}
+
+HopfPoint.prototype.remove = function() {
+	scene.remove(this.mesh);
+	hopfMap.removePoint(this.mapPoint);
+}
+
+function circleSamplePoints(c, N) {
+	var b = C3.unit(C3.duale(C3.Dr.elem(C3.Fl.dir(C3.Ro.car(c)))));
+	var R = Gen_ratio_vec(VEC_Y, b);
+
+	var pts = [];
+	for(var i=0; i <= N; ++i) {
+		var theta = i*Math.PI*2/N;
+		var v = C3.Vec3(Math.cos(theta), 0, Math.sin(theta));
+		pts.push(v.sp(R));
+	}
+	return pts;
+}
+
+
+
+/*
+var P1 = new HopfPoint(C3.Vec3(0, -1, 0));
+var P2 = new HopfPoint(C3.Vec3(0, 1, 0));
+
+function changeCircle() {
+	P2.moveTo(C3.Vec3(0.1, -0.8, 0));
+}
+*/
+
+
+var csample = C3.Ro.circle(C3.Ro.point(0, 0, 0), C3.Drv(0, 1, 0), 1);
+var pts = circleSamplePoints(csample, 40);
+for(var i=0; i < pts.length; ++i) {
+	pts[i] = new HopfPoint(pts[i]);
+}
+
+function animCircles(frame) {
+	var t = frame/100;
+	
+	var C = C3.Ro.circle(C3.Ro.point(0, 0, 0), C3.Drv(Math.cos(t), Math.sin(t), 0), 1);
+	var newPts = circleSamplePoints(C, pts.length);
+	
+	for(var i=0; i < pts.length; ++i) {
+		pts[i].moveTo(newPts[i]);
+	}
+}
+
+
+camera.position.z = 3;
+
+window.addEventListener('resize', onWindowResize, false)
+function onWindowResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	controls.handleResize();
+}
+
+var frame = 0;
+function render() {
+	++frame;
+	animCircles(frame);
+	
+	requestAnimationFrame(render);
+	controls.update();
+	renderer.render(scene, camera);
+	
+}
+render();
+
+
+		</script>
+	</body>
+</html

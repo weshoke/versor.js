@@ -165,10 +165,11 @@ function onWindowResize() {
 }
 
 function render() {
-	requestAnimationFrame(render);
+	/*requestAnimationFrame(render);
 	generator.applySystem(particleSystem);
 	bounds.applySystem(particleSystem);
 	setup.render();
+	*/
 }
 render();
 
@@ -176,17 +177,86 @@ render();
 console.log(numeric.solve([[1,2],[3,4]],[17,39]));
 
 var A = [
-	[0, 1, 2],
-	[1, 2, 3],
-	[10, 20, 30]
+	[0, 1, 0],
+	[1, 2, 0],
+	[10, 0, 30]
 ];
 var sA = numeric.ccsSparse(A);
-console.log(sA);
+console.log(sA[0], sA[1], sA[2]);
+
+
+function ccsFromTriplet(triplets) {
+	/*var ncols = 0;
+	for(var i=0; i < triplets.length; ++i) {
+		var triplet = triplets[i];
+		ncols = Math.max(nclos, triplet[1]);
+	}
+	*/
+	
+	triplets.sort(function(a, b) {
+		if(a[1] === b[1]) {
+			if(a[0] < b[0]) {
+				return -1;
+			}
+			else {
+				return 1;
+			}
+		}
+		else if(a[1] < b[1]) {
+			return -1;
+		}
+		else {
+			return 1;
+		}
+	});
+
+	var ncols = triplets[triplets.length-1][1];
+	var Ai = Array(ncols+1);
+	var Aj = Array(triplets.length);
+	var Av = Array(triplets.length);
+	
+	var previ = -1;
+	var col = -1;
+	for(var i=0; i < triplets.length; ++i) {
+		var triplet = triplets[i];
+		if(previ !== triplet[1]) {
+			Ai[++col] = i;
+			previ = triplet[1];
+		}
+		Aj[i] = triplet[0];
+		Av[i] = triplet[2];
+	}
+	Ai[++col] = triplets.length;
+	return [Ai, Aj, Av];
+}
+//var res = ccsFromTriplet([[2, 0, 10], [1, 1, 2], [0, 1, 1], [1, 0, 1], [2, 2, 30]]);
+var res = ccsFromTriplet([[0, 1, 1], [1, 0, 1], [1, 1, 2], [2, 0, 1], [2, 2, 1]]);
+//var res = ccsFromTriplet([[0, 0, 1], [1, 1, 1], [2, 2, 10], [2, 1, 1]]);
+var LUP = numeric.ccsLUP(res);
+var b = [0, 1, 2];
+var x = numeric.ccsLUPSolve(LUP, b);
+//console.log(numeric.ccsFull(res));
+console.log("x:", x);
+console.log("b:", numeric.dot(numeric.ccsFull(res), x));
+console.log("b:", b);
+
+var FF = numeric.ccsFull(res);
+for(var i=0; i < FF.length; ++i) {
+	console.log(FF[i]);
+}
+
+
+//console.log(numeric.ccsFull(sA));
+//console.log(numeric.ccsGetBlock(sA, 1, 1));
+//console.log(numeric.ccsFull(numeric.ccsGetBlock(sA, 1, 1)));
+
+/*console.log(sA);
 for(var i=0; i < 5; ++i) {
 for(var j=0; j < 5; ++j) {
 	console.log(i, j, A.get([i, j]));
 }
 }
+*/
 
 
 

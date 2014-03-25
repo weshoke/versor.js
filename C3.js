@@ -70,8 +70,14 @@ C3.Ro = {
 		else return Math.sqrt(size);
 	},
 	cen: function(a) {
-		var v = C3.Inf.ip(a);
-		return C3.Pnt(a.gp(C3.Inf).gp(a).div(v.gp(v).gp(-2)));
+		// C3.Pnt(s.div(Inf(-1).ip(s)))
+		//var v = C3.Inf.ip(a);
+		//return C3.Pnt(a.gp(C3.Inf).gp(a).div(v.gp(v).gp(-2)));
+		return C3.Pnt(a.div(C3.e5(-1).ip(a)));
+	},
+	loc: function(a) {
+		var c = C3.Ro.cen(a);
+		return C3.Ro.point(c[0], c[1], c[2]);
 	},
 	// squared distance
 	sqd: function(a, b) {
@@ -125,7 +131,7 @@ C3.Fl = {
 
 C3.Op = {
 	trs: function(x, y, z) {
-		return C3.Trs(1, 0.5*x, 0.5*y, 0.5*z);
+		return C3.Trs(1, -0.5*x, -0.5*y, -0.5*z);
 	},
 	bst: function(pp) {
 		var sz = C3.wt(pp);
@@ -184,6 +190,14 @@ var feq = function(v1, v2, eps) {
 }
 
 C3.Gen = {
+	rot: function(b) {
+		var c = Math.sqrt(-C3.wt(b));
+		var sc = Math.sin(-c);
+		if(Math.abs(c) > 1e-7) {
+			sc /= c;
+		}
+		return b.gp(sc).add(C3.s(Math.cos(c)));
+	},
 	dil: function(amt) {
         return C3.Dil(cosh(amt*0.5), sinh(amt*0.5));
 	},
@@ -234,15 +248,26 @@ C3.Gen = {
 			return C3.Dll(b.add(c)); 
 		}
     },
+    ratioDll: function(a, b, t) {
+    	var m = b.div(a);
+    	var n = C3.rnorm(m);
+    	if(n != 0) {
+    		m = m.gp(1/n);
+    	}
+    	return C3.Gen.log(m).gp(0.5*t);
+    },
     ratio: function(a, b, t) {
+		return C3.Gen.mot(C3.Gen.ratioDll(a, b, t));
+		
+		/*
 		if(feq(C3.norm(a), 0, 1e-8)) {
 			var dll = b.gp(t);
 			return C3.Gen.mot(dll);
 		}
 		
-    	var m = b.div(a);
+		var m = b.div(a);
     	var n = C3.rnorm(m);
-    	if(n !== 0) {
+		if(n !== 0) {
     		m = m.gp(1/n);
 		}
 		var dll = C3.Gen.log(m).gp(t*0.5);
@@ -272,13 +297,15 @@ C3.Gen = {
 				return C3.Op.trs(trans[0], trans[1], trans[2]).gp(rot);
 			}
 			else {
-				var dll2 = C3.Dll(t);
-				return C3.Mot(dll2);
+				//var dll2 = C3.Dll(t);
+				//return C3.Mot(dll2);
+				return C3.Mot(a);
 			}
 		}
 		else {
 	    	return C3.Gen.mot(dll);
 	    }
+	    */
     }
 }
 

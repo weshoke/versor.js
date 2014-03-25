@@ -171,22 +171,30 @@ function createParticleSystem(size) {
 
 var BoostGenerator = function(par) {
 	this.generator = C3.Op.bst(par);
+	console.log("BOOST:", this.generator.toString());
 }
 
-BoostGenerator.prototype.apply = function(p) {
-	var pnt = Vector3ToPnt(p);
-	var pnt2 = pnt.sp(dil).normalize();
-	p.x = pnt2[0];
-	p.y = pnt2[1];
-	p.z = pnt2[2];
-}
-
+var _A = 0;
 BoostGenerator.prototype.applySystem = function(particleSystem) {
 	for(var i=0; i < particleSystem.geometry.vertices.length; ++i) {
 		var p = particleSystem.geometry.vertices[i];
 		var pnt = Vector3ToPnt(p);
 		var pnt2 = pnt.sp(this.generator).normalize();
+		
+		if(_A < 1) {
+			console.log(pnt.sp);
+			console.log(pnt.type);
+			console.log(this.generator._gp[pnt.type]);
+			console.log(this.generator.reverse);
+			console.log(this.generator.gp(pnt)._gp[this.generator.type]);
+			console.log(this.generator.gp(pnt).gp(this.generator.reverse()).type);
+			console.log(pnt._cast[this.generator.gp(pnt).gp(this.generator.reverse()).type]);
+		}
+		
 		var p2 = PntToVector3(pnt2);
+		
+		_A++;
+		
 		if(p.life > p.maxLife || p2.sub(p).lengthSq() < 0.00001) {
 			createParticle(p);
 		}
@@ -232,6 +240,8 @@ BoundingBox.prototype.applySystem = function(particleSystem) {
 var p1 = C3.Ro.ipoint(2, 0, 0);
 var p2 = C3.Ro.ipoint(-2, 1, 0);
 var par = p1.op(p2).gp(0.025);
+
+console.log("XX:", p1._op[p2.type]);
 
 
 var setup = new ThreeSetup();
