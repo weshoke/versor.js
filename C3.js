@@ -81,7 +81,7 @@ C3.Ro = {
 	},
 	// squared distance
 	sqd: function(a, b) {
-		return -a.ip(b)[0];
+		return -2.0 * a.ip(b)[0];
 	},
 	// distance
 	dst: function(a, b) {
@@ -92,7 +92,7 @@ C3.Ro = {
 	},
 	// split a point pair into its 2 points, returns an array
 	split: function(pp) {
-		var r = C3.Ro.dst(pp, pp);
+		var r = Math.sqrt( Math.abs( pp.ip(pp)[0]  )) 
 		var dlp = C3.e5(-1).ip(pp);
 		var bstA = C3.Bst(pp);
 		var bstB = C3.Bst(pp);
