@@ -118,6 +118,9 @@ C3.Fl = {
 	line: function(p1, p2) {
 		return p1.op(p2).op(C3.Inf);
 	},
+	plane: function(pos, drv) {
+		return C3.dual(pos.ip(drv));
+	},
 	dir: function(a) {
 		return a.isdual() ?
 			C3.e5(1).op(a) :

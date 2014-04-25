@@ -9,6 +9,7 @@ var C2 = versor.create({
 		{ name:"Par", bases:["e12", "e13", "e14", "e23", "e24", "e34"] },
 		{ name:"Dll", bases:["e1", "e2", "e4"], dual:true },
 		{ name:"Lin", bases:["e134", "e234", "e124"] },
+		{ name:"Cir", bases:["e123", "e234", "e124", "e134"] },
 		{ name:"Flp", bases:["e14", "e24", "e34"] },
 		{ name:"Drv", bases:["e14", "e24"] },
 		{ name:"Tnv", bases:["e13", "e23"] },
