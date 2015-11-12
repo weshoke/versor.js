@@ -106,7 +106,7 @@ var biv = E3.Vec(1, 0, 0).op(E3.Vec(0, 1, 0));
 var v2 = E3.Vec(1, 0, 0).ip(E3.Biv(0, 1, 0));
 ```
 
-One thing to note is that the inner product can be defined in a number of ways with differing results.  The most common inner products are the left constraction and the right contraction.  Here, the inner product is equivalent to the left contraction.  Essentially this means that the first operand must be the same or lower grade than the second operand.  Otherwise, the result is a scalar value of 0.
+One thing to note is that the inner product can be defined in a number of ways with differing results.  The most common inner products are the left contraction and the right contraction.  Here, the inner product is equivalent to the left contraction.  Essentially this means that the first operand must be the same or lower grade than the second operand.  Otherwise, the result is a scalar value of 0.
 
 ```js
 // the inner product (left contraction) is not commutative
