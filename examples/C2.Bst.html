@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 	
 	var transformedPoints = [];
 	points.forEach(function(v, i) {
-		transformedPoints[i] = Ro.pointNormalize(v.sp(bst));
+		transformedPoints[i] = Ro.point.normalize(v.sp(bst));
 	});
 	
 	var g;
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function(evt) {
 						.attr("cy", function(d) { return d[1]; });
 				
 					points.forEach(function(v, i) {
-						transformedPoints[i] = Ro.pointNormalize(v.sp(bst));
+						transformedPoints[i] = Ro.point.normalize(v.sp(bst));
 					});
 					
 					var sel = g.selectAll(".transformedPoints").data(transformedPoints);
